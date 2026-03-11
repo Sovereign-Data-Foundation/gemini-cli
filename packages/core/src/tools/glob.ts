@@ -18,6 +18,8 @@ import {
 import { Type } from '@google/genai';
 import { shortenPath, makeRelative } from '../utils/paths.js';
 import { Config } from '../config/config.js';
+import { BASE_EXCLUDES } from '../utils/constants.js';
+import { getCurrentGeminiMdFilename } from './memoryTool.js';
 
 // Subset of 'Path' interface provided by 'glob' that we can implement for testing
 export interface GlobPath {
@@ -145,7 +147,7 @@ class GlobToolInvocation extends BaseToolInvocation<
           stat: true,
           nocase: !this.params.case_sensitive,
           dot: true,
-          ignore: ['**/node_modules/**', '**/.git/**'],
+          ignore: [...BASE_EXCLUDES, `**/${getCurrentGeminiMdFilename()}`],
           follow: false,
           signal,
         })) as GlobPath[];
