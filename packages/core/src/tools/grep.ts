@@ -23,6 +23,8 @@ import { makeRelative, shortenPath } from '../utils/paths.js';
 import { getErrorMessage, isNodeError } from '../utils/errors.js';
 import { isGitRepository } from '../utils/gitUtils.js';
 import { Config } from '../config/config.js';
+import { BASE_EXCLUDES } from '../utils/constants.js';
+import { getCurrentGeminiMdFilename } from './memoryTool.js';
 
 // --- Interfaces ---
 
@@ -388,8 +390,20 @@ class GrepToolInvocation extends BaseToolInvocation<
       if (grepAvailable) {
         strategyUsed = 'system grep';
         const grepArgs = ['-r', '-n', '-H', '-E'];
-        const commonExcludes = ['.git', 'node_modules', 'bower_components'];
-        commonExcludes.forEach((dir) => grepArgs.push(`--exclude-dir=${dir}`));
+        const excludes = [...BASE_EXCLUDES, getCurrentGeminiMdFilename()];
+        excludes.forEach((pattern) => {
+          // Strip glob-specific syntax like **/ and /** for system grep
+          const strippedPattern = pattern
+            .replace(/^\*\*\//, '')
+            .replace(/\/\*\*$/, '');
+
+          // grep --exclude and --exclude-dir handle patterns differently.
+          if (pattern.endsWith('/**') || !strippedPattern.includes('.')) {
+            grepArgs.push(`--exclude-dir=${strippedPattern}`);
+          } else {
+            grepArgs.push(`--exclude=${strippedPattern}`);
+          }
+        });
         if (include) {
           grepArgs.push(`--include=${include}`);
         }
@@ -472,12 +486,9 @@ class GrepToolInvocation extends BaseToolInvocation<
       strategyUsed = 'javascript fallback';
       const globPattern = include ? include : '**/*';
       const ignorePatterns = [
-        '.git/**',
-        'node_modules/**',
-        'bower_components/**',
-        '.svn/**',
-        '.hg/**',
-      ]; // Use glob patterns for ignores here
+        ...BASE_EXCLUDES,
+        `**/${getCurrentGeminiMdFilename()}`,
+      ];
 
       const filesStream = globStream(globPattern, {
         cwd: absolutePath,
