@@ -49,12 +49,16 @@ describe('ShellExecutionService', () => {
 
     mockChildProcess = new EventEmitter() as EventEmitter &
       Partial<ChildProcess>;
-    // FIX: Cast simple EventEmitters to the expected stream type.
-    mockChildProcess.stdout = new EventEmitter() as Readable;
-    mockChildProcess.stderr = new EventEmitter() as Readable;
+    Object.defineProperty(mockChildProcess, 'stdout', {
+      value: new EventEmitter() as Readable,
+      configurable: true,
+    });
+    Object.defineProperty(mockChildProcess, 'stderr', {
+      value: new EventEmitter() as Readable,
+      configurable: true,
+    });
     mockChildProcess.kill = vi.fn();
 
-    // FIX: Use Object.defineProperty to set the readonly 'pid' property.
     Object.defineProperty(mockChildProcess, 'pid', {
       value: 12345,
       configurable: true,

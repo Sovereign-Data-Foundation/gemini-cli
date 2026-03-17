@@ -152,7 +152,10 @@ describe('sandbox security', () => {
             mockP.on.mockImplementation((event, cb) => {
                  return mockP;
             });
-            mockP.pid = 999;
+            Object.defineProperty(mockP, 'pid', {
+                value: 999,
+                configurable: true,
+            });
         } else if (isSandbox) {
              mockP.on.mockImplementation((event, cb) => {
                 if (event === 'close') {
@@ -160,7 +163,10 @@ describe('sandbox security', () => {
                 }
                 return mockP;
             });
-             mockP.pid = 456;
+            Object.defineProperty(mockP, 'pid', {
+                value: 456,
+                configurable: true,
+            });
         } else {
              // Image checks etc should exit
              mockP.on.mockImplementation((event, cb) => {
@@ -169,7 +175,10 @@ describe('sandbox security', () => {
                 }
                 return mockP;
             });
-             mockP.pid = 123;
+            Object.defineProperty(mockP, 'pid', {
+                value: 123,
+                configurable: true,
+            });
         }
 
         return mockP as any;
