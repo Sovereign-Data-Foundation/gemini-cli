@@ -18,7 +18,10 @@ import { renderHook } from '@testing-library/react';
 import { useGitBranchName } from './useGitBranchName.js';
 import { fs, vol } from 'memfs'; // For mocking fs
 import { EventEmitter } from 'node:events';
-import { exec as mockExec, type ChildProcess } from 'node:child_process';
+import {
+  execFile as mockExecFile,
+  type ChildProcess,
+} from 'node:child_process';
 import type { FSWatcher } from 'memfs/lib/volume.js';
 
 // Mock child_process
@@ -53,8 +56,8 @@ describe('useGitBranchName', () => {
   });
 
   it('should return branch name', async () => {
-    (mockExec as MockedFunction<typeof mockExec>).mockImplementation(
-      (_command, _options, callback) => {
+    (mockExecFile as MockedFunction<typeof mockExecFile>).mockImplementation(
+      (_command, _args, _options, callback) => {
         callback?.(null, 'main\n', '');
         return new EventEmitter() as ChildProcess;
       },
@@ -71,8 +74,8 @@ describe('useGitBranchName', () => {
   });
 
   it('should return undefined if git command fails', async () => {
-    (mockExec as MockedFunction<typeof mockExec>).mockImplementation(
-      (_command, _options, callback) => {
+    (mockExecFile as MockedFunction<typeof mockExecFile>).mockImplementation(
+      (_command, _args, _options, callback) => {
         callback?.(new Error('Git error'), '', 'error output');
         return new EventEmitter() as ChildProcess;
       },
@@ -89,11 +92,11 @@ describe('useGitBranchName', () => {
   });
 
   it('should return short commit hash if branch is HEAD (detached state)', async () => {
-    (mockExec as MockedFunction<typeof mockExec>).mockImplementation(
-      (command, _options, callback) => {
-        if (command === 'git rev-parse --abbrev-ref HEAD') {
+    (mockExecFile as MockedFunction<typeof mockExecFile>).mockImplementation(
+      (command, args, _options, callback) => {
+        if (command === 'git' && args?.[1] === '--abbrev-ref') {
           callback?.(null, 'HEAD\n', '');
-        } else if (command === 'git rev-parse --short HEAD') {
+        } else if (command === 'git' && args?.[1] === '--short') {
           callback?.(null, 'a1b2c3d\n', '');
         }
         return new EventEmitter() as ChildProcess;
@@ -109,11 +112,11 @@ describe('useGitBranchName', () => {
   });
 
   it('should return undefined if branch is HEAD and getting commit hash fails', async () => {
-    (mockExec as MockedFunction<typeof mockExec>).mockImplementation(
-      (command, _options, callback) => {
-        if (command === 'git rev-parse --abbrev-ref HEAD') {
+    (mockExecFile as MockedFunction<typeof mockExecFile>).mockImplementation(
+      (command, args, _options, callback) => {
+        if (command === 'git' && args?.[1] === '--abbrev-ref') {
           callback?.(null, 'HEAD\n', '');
-        } else if (command === 'git rev-parse --short HEAD') {
+        } else if (command === 'git' && args?.[1] === '--short') {
           callback?.(new Error('Git error'), '', 'error output');
         }
         return new EventEmitter() as ChildProcess;
@@ -130,12 +133,12 @@ describe('useGitBranchName', () => {
 
   it('should update branch name when .git/HEAD changes', async ({ skip }) => {
     skip(); // TODO: fix
-    (mockExec as MockedFunction<typeof mockExec>).mockImplementationOnce(
-      (_command, _options, callback) => {
-        callback?.(null, 'main\n', '');
-        return new EventEmitter() as ChildProcess;
-      },
-    );
+    (
+      mockExecFile as MockedFunction<typeof mockExecFile>
+    ).mockImplementationOnce((_command, _args, _options, callback) => {
+      callback?.(null, 'main\n', '');
+      return new EventEmitter() as ChildProcess;
+    });
 
     const { result, rerender } = renderHook(() => useGitBranchName(CWD));
 
@@ -146,12 +149,12 @@ describe('useGitBranchName', () => {
     expect(result.current).toBe('main');
 
     // Simulate a branch change
-    (mockExec as MockedFunction<typeof mockExec>).mockImplementationOnce(
-      (_command, _options, callback) => {
-        callback?.(null, 'develop\n', '');
-        return new EventEmitter() as ChildProcess;
-      },
-    );
+    (
+      mockExecFile as MockedFunction<typeof mockExecFile>
+    ).mockImplementationOnce((_command, _args, _options, callback) => {
+      callback?.(null, 'develop\n', '');
+      return new EventEmitter() as ChildProcess;
+    });
 
     // Simulate file change event
     // Ensure the watcher is set up before triggering the change
@@ -168,8 +171,8 @@ describe('useGitBranchName', () => {
     // Remove .git/HEAD to cause an error in fs.watch setup
     vol.unlinkSync(GIT_HEAD_PATH);
 
-    (mockExec as MockedFunction<typeof mockExec>).mockImplementation(
-      (_command, _options, callback) => {
+    (mockExecFile as MockedFunction<typeof mockExecFile>).mockImplementation(
+      (_command, _args, _options, callback) => {
         callback?.(null, 'main\n', '');
         return new EventEmitter() as ChildProcess;
       },
@@ -185,12 +188,12 @@ describe('useGitBranchName', () => {
     expect(result.current).toBe('main'); // Branch name should still be fetched initially
 
     // Try to trigger a change that would normally be caught by the watcher
-    (mockExec as MockedFunction<typeof mockExec>).mockImplementationOnce(
-      (_command, _options, callback) => {
-        callback?.(null, 'develop\n', '');
-        return new EventEmitter() as ChildProcess;
-      },
-    );
+    (
+      mockExecFile as MockedFunction<typeof mockExecFile>
+    ).mockImplementationOnce((_command, _args, _options, callback) => {
+      callback?.(null, 'develop\n', '');
+      return new EventEmitter() as ChildProcess;
+    });
 
     // This write would trigger the watcher if it was set up
     // but since it failed, the branch name should not update
@@ -216,8 +219,8 @@ describe('useGitBranchName', () => {
       close: closeMock,
     } as unknown as FSWatcher);
 
-    (mockExec as MockedFunction<typeof mockExec>).mockImplementation(
-      (_command, _options, callback) => {
+    (mockExecFile as MockedFunction<typeof mockExecFile>).mockImplementation(
+      (_command, _args, _options, callback) => {
         callback?.(null, 'main\n', '');
         return new EventEmitter() as ChildProcess;
       },

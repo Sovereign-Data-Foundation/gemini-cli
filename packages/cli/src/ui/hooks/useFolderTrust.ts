@@ -28,7 +28,7 @@ export const useFolderTrust = (settings: LoadedSettings) => {
   });
 
   const [isFolderTrustDialogOpen, setIsFolderTrustDialogOpen] = useState(
-    !!settings.merged.folderTrustFeature && !isTrusted
+    !!settings.merged.folderTrustFeature && !isTrusted,
   );
 
   const handleFolderTrustSelect = useCallback(

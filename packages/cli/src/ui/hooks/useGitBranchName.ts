@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { exec } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import fsPromises from 'node:fs/promises';
 import path from 'path';
@@ -15,8 +15,9 @@ export function useGitBranchName(cwd: string): string | undefined {
 
   const fetchBranchName = useCallback(
     () =>
-      exec(
-        'git rev-parse --abbrev-ref HEAD',
+      execFile(
+        'git',
+        ['rev-parse', '--abbrev-ref', 'HEAD'],
         { cwd },
         (error, stdout, _stderr) => {
           if (error) {
@@ -27,8 +28,9 @@ export function useGitBranchName(cwd: string): string | undefined {
           if (branch && branch !== 'HEAD') {
             setBranchName(branch);
           } else {
-            exec(
-              'git rev-parse --short HEAD',
+            execFile(
+              'git',
+              ['rev-parse', '--short', 'HEAD'],
               { cwd },
               (error, stdout, _stderr) => {
                 if (error) {
