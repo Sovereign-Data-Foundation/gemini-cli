@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import os from 'os';
 import { detect as chardetDetect } from 'chardet';
 
@@ -53,7 +53,7 @@ export function getSystemEncoding(): string | null {
   // Windows
   if (os.platform() === 'win32') {
     try {
-      const output = execSync('chcp', { encoding: 'utf8' });
+      const output = execFileSync('chcp', [], { encoding: 'utf8' });
       const match = output.match(/:\s*(\d+)/);
       if (match) {
         const codePage = parseInt(match[1], 10);
@@ -84,7 +84,7 @@ export function getSystemEncoding(): string | null {
   // Fallback to querying the system directly when environment variables are missing
   if (!locale) {
     try {
-      locale = execSync('locale charmap', { encoding: 'utf8' })
+      locale = execFileSync('locale', ['charmap'], { encoding: 'utf8' })
         .toString()
         .trim();
     } catch (_e) {

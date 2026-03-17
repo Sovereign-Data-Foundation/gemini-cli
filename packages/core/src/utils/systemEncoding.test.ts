@@ -5,7 +5,7 @@
  */
 
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import * as os from 'os';
 import { detect as chardetDetect } from 'chardet';
 
@@ -25,13 +25,13 @@ import {
 
 describe('Shell Command Processor - Encoding Functions', () => {
   let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
-  let mockedExecSync: ReturnType<typeof vi.mocked<typeof execSync>>;
+  let mockedExecFileSync: ReturnType<typeof vi.mocked<typeof execFileSync>>;
   let mockedOsPlatform: ReturnType<typeof vi.mocked<() => string>>;
   let mockedChardetDetect: ReturnType<typeof vi.mocked<typeof chardetDetect>>;
 
   beforeEach(() => {
     consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    mockedExecSync = vi.mocked(execSync);
+    mockedExecFileSync = vi.mocked(execFileSync);
     mockedOsPlatform = vi.mocked(os.platform);
     mockedChardetDetect = vi.mocked(chardetDetect);
 
@@ -141,29 +141,31 @@ describe('Shell Command Processor - Encoding Functions', () => {
     });
 
     it('should parse Windows chcp output correctly', () => {
-      mockedExecSync.mockReturnValue('Active code page: 65001');
+      mockedExecFileSync.mockReturnValue('Active code page: 65001');
 
       const result = getSystemEncoding();
       expect(result).toBe('utf-8');
-      expect(mockedExecSync).toHaveBeenCalledWith('chcp', { encoding: 'utf8' });
+      expect(mockedExecFileSync).toHaveBeenCalledWith('chcp', [], {
+        encoding: 'utf8',
+      });
     });
 
     it('should handle different chcp output formats', () => {
-      mockedExecSync.mockReturnValue('Current code page: 1252');
+      mockedExecFileSync.mockReturnValue('Current code page: 1252');
 
       const result = getSystemEncoding();
       expect(result).toBe('windows-1252');
     });
 
     it('should handle chcp output with extra whitespace', () => {
-      mockedExecSync.mockReturnValue('Active code page:   437   ');
+      mockedExecFileSync.mockReturnValue('Active code page:   437   ');
 
       const result = getSystemEncoding();
       expect(result).toBe('cp437');
     });
 
     it('should return null when chcp command fails', () => {
-      mockedExecSync.mockImplementation(() => {
+      mockedExecFileSync.mockImplementation(() => {
         throw new Error('Command failed');
       });
 
@@ -177,7 +179,7 @@ describe('Shell Command Processor - Encoding Functions', () => {
     });
 
     it('should return null when chcp output cannot be parsed', () => {
-      mockedExecSync.mockReturnValue('Unexpected output format');
+      mockedExecFileSync.mockReturnValue('Unexpected output format');
 
       const result = getSystemEncoding();
       expect(result).toBe(null);
@@ -189,7 +191,7 @@ describe('Shell Command Processor - Encoding Functions', () => {
     });
 
     it('should return null when code page is not a number', () => {
-      mockedExecSync.mockReturnValue('Active code page: abc');
+      mockedExecFileSync.mockReturnValue('Active code page: abc');
 
       const result = getSystemEncoding();
       expect(result).toBe(null);
@@ -201,7 +203,7 @@ describe('Shell Command Processor - Encoding Functions', () => {
     });
 
     it('should return null when code page maps to null', () => {
-      mockedExecSync.mockReturnValue('Active code page: 99999');
+      mockedExecFileSync.mockReturnValue('Active code page: 99999');
 
       const result = getSystemEncoding();
       expect(result).toBe(null);
@@ -239,24 +241,24 @@ describe('Shell Command Processor - Encoding Functions', () => {
     });
 
     it('should handle locale charmap command when environment variables are empty', () => {
-      mockedExecSync.mockReturnValue('UTF-8\n');
+      mockedExecFileSync.mockReturnValue('UTF-8\n');
 
       const result = getSystemEncoding();
       expect(result).toBe('utf-8');
-      expect(mockedExecSync).toHaveBeenCalledWith('locale charmap', {
+      expect(mockedExecFileSync).toHaveBeenCalledWith('locale', ['charmap'], {
         encoding: 'utf8',
       });
     });
 
     it('should handle locale charmap with mixed case', () => {
-      mockedExecSync.mockReturnValue('ISO-8859-1\n');
+      mockedExecFileSync.mockReturnValue('ISO-8859-1\n');
 
       const result = getSystemEncoding();
       expect(result).toBe('iso-8859-1');
     });
 
     it('should return null when locale charmap fails', () => {
-      mockedExecSync.mockImplementation(() => {
+      mockedExecFileSync.mockImplementation(() => {
         throw new Error('Command failed');
       });
 
@@ -278,7 +280,7 @@ describe('Shell Command Processor - Encoding Functions', () => {
       process.env.LC_ALL = '';
       process.env.LC_CTYPE = '';
       process.env.LANG = '';
-      mockedExecSync.mockReturnValue('UTF-8');
+      mockedExecFileSync.mockReturnValue('UTF-8');
 
       const result = getSystemEncoding();
       expect(result).toBe('utf-8');
@@ -332,7 +334,7 @@ describe('Shell Command Processor - Encoding Functions', () => {
 
     it('should fall back to buffer detection when system encoding fails', () => {
       // No environment variables set
-      mockedExecSync.mockImplementation(() => {
+      mockedExecFileSync.mockImplementation(() => {
         throw new Error('locale command failed');
       });
 
@@ -346,7 +348,7 @@ describe('Shell Command Processor - Encoding Functions', () => {
 
     it('should fall back to utf-8 when both system and buffer detection fail', () => {
       // System encoding fails
-      mockedExecSync.mockImplementation(() => {
+      mockedExecFileSync.mockImplementation(() => {
         throw new Error('locale command failed');
       });
 
@@ -362,7 +364,7 @@ describe('Shell Command Processor - Encoding Functions', () => {
 
     it('should not cache buffer detection results', () => {
       // System encoding fails initially
-      mockedExecSync.mockImplementation(() => {
+      mockedExecFileSync.mockImplementation(() => {
         throw new Error('locale command failed');
       });
 
@@ -383,7 +385,7 @@ describe('Shell Command Processor - Encoding Functions', () => {
 
     it('should handle Windows system encoding', () => {
       mockedOsPlatform.mockReturnValue('win32');
-      mockedExecSync.mockReturnValue('Active code page: 1252');
+      mockedExecFileSync.mockReturnValue('Active code page: 1252');
 
       const buffer = Buffer.from('test');
       const result = getCachedEncodingForBuffer(buffer);
@@ -399,7 +401,7 @@ describe('Shell Command Processor - Encoding Functions', () => {
       mockedOsPlatform.mockReturnValue('linux');
 
       // System encoding detection returns null
-      mockedExecSync.mockImplementation(() => {
+      mockedExecFileSync.mockImplementation(() => {
         throw new Error('locale command failed');
       });
 
@@ -411,13 +413,13 @@ describe('Shell Command Processor - Encoding Functions', () => {
         .mockReturnValueOnce('UTF-16');
 
       // Clear any previous calls from beforeEach setup or previous tests
-      mockedExecSync.mockClear();
+      mockedExecFileSync.mockClear();
 
       const result1 = getCachedEncodingForBuffer(buffer1);
       const result2 = getCachedEncodingForBuffer(buffer2);
 
-      // Should call execSync only once due to caching (null result is cached)
-      expect(mockedExecSync).toHaveBeenCalledTimes(1);
+      // Should call execFileSync only once due to caching (null result is cached)
+      expect(mockedExecFileSync).toHaveBeenCalledTimes(1);
       expect(result1).toBe('iso-8859-1');
       expect(result2).toBe('utf-16');
 
@@ -426,8 +428,8 @@ describe('Shell Command Processor - Encoding Functions', () => {
       mockedChardetDetect.mockReturnValueOnce('UTF-32');
       const result3 = getCachedEncodingForBuffer(buffer3);
 
-      // Still should be only one call to execSync
-      expect(mockedExecSync).toHaveBeenCalledTimes(1);
+      // Still should be only one call to execFileSync
+      expect(mockedExecFileSync).toHaveBeenCalledTimes(1);
       expect(result3).toBe('utf-32');
     });
   });
@@ -482,7 +484,7 @@ describe('Shell Command Processor - Encoding Functions', () => {
       const unicodeText = '你好世界 🌍 ñoño';
 
       // System encoding fails
-      mockedExecSync.mockImplementation(() => {
+      mockedExecFileSync.mockImplementation(() => {
         throw new Error('locale command failed');
       });
 
