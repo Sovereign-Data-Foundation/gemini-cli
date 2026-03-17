@@ -92,16 +92,6 @@ type FileProcessingResult =
       reason: string;
     };
 
-/**
- * Default exclusion patterns for commonly ignored directories and binary file types.
- * These are compatible with glob ignore patterns.
- * TODO(adh): Consider making this configurable or extendable through a command line argument.
- */
-const DEFAULT_EXCLUDES: string[] = [
-  ...BASE_EXCLUDES,
-  `**/${getCurrentGeminiMdFilename()}`,
-];
-
 const DEFAULT_OUTPUT_SEPARATOR_FORMAT = '--- {filePath} ---';
 
 /**
@@ -218,9 +208,10 @@ Use this tool when the user's query implies needing the content of several files
     const geminiIgnorePatterns = this.config
       .getFileService()
       .getGeminiIgnorePatterns();
+    const defaultExcludes = [...BASE_EXCLUDES, `**/${getCurrentGeminiMdFilename()}`];
     const finalExclusionPatternsForDescription: string[] =
       paramUseDefaultExcludes
-        ? [...DEFAULT_EXCLUDES, ...paramExcludes, ...geminiIgnorePatterns]
+        ? [...defaultExcludes, ...paramExcludes, ...geminiIgnorePatterns]
         : [...paramExcludes, ...geminiIgnorePatterns];
 
     let excludeDesc = `Excluding: ${finalExclusionPatternsForDescription.length > 0 ? `patterns like \`${finalExclusionPatternsForDescription.slice(0, 2).join('`, `')}${finalExclusionPatternsForDescription.length > 2 ? '...`' : '`'}` : 'none specified'}`;
@@ -276,8 +267,9 @@ Use this tool when the user's query implies needing the content of several files
     const processedFilesRelativePaths: string[] = [];
     const contentParts: PartListUnion = [];
 
+    const defaultExcludes = [...BASE_EXCLUDES, `**/${getCurrentGeminiMdFilename()}`];
     const effectiveExcludes = useDefaultExcludes
-      ? [...DEFAULT_EXCLUDES, ...exclude]
+      ? [...defaultExcludes, ...exclude]
       : [...exclude];
 
     const searchPatterns = [...inputPatterns, ...include];

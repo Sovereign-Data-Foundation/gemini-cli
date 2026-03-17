@@ -12,6 +12,7 @@ import { Ignore } from './ignore.js';
 import { ResultCache } from './result-cache.js';
 import * as cache from './crawlCache.js';
 import { AsyncFzf, FzfResultItem } from 'fzf';
+import { BASE_EXCLUDES } from '../constants.js';
 
 export type FileSearchOptions = {
   projectRoot: string;
@@ -213,6 +214,8 @@ export class FileSearch {
         this.ignore.add(fs.readFileSync(geminiignorePath, 'utf8'));
       }
     }
+
+    this.ignore.add(BASE_EXCLUDES);
 
     const ignoreDirs = ['.git', ...this.options.ignoreDirs];
     this.ignore.add(

@@ -11,10 +11,17 @@ import { getErrorMessage, isNodeError } from './errors.js';
 import { FileDiscoveryService } from '../services/fileDiscoveryService.js';
 import { FileFilteringOptions } from '../config/config.js';
 import { DEFAULT_FILE_FILTERING_OPTIONS } from '../config/config.js';
+import { BASE_EXCLUDES } from './constants.js';
 
 const MAX_ITEMS = 200;
 const TRUNCATION_INDICATOR = '...';
-const DEFAULT_IGNORED_FOLDERS = new Set(['node_modules', '.git', 'dist']);
+const DEFAULT_IGNORED_FOLDERS = new Set([
+  ...BASE_EXCLUDES.filter((p) => !p.includes('.'))
+    .map((p) => p.replace(/^\*\*\//, '').replace(/\/$/, ''))
+    .filter((p) => p !== ''),
+  '.git',
+  'dist',
+]);
 
 // --- Interfaces ---
 
