@@ -4,7 +4,7 @@ import {
   BadRequestError,
   UnauthorizedError,
   ForbiddenError,
-} from './errors';
+} from './errors.js';
 
 describe('toFriendlyError', () => {
   it('should return the original error if it is not an object', () => {
