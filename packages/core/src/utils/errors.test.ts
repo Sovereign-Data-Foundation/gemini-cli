@@ -1,10 +1,17 @@
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, it, expect } from 'vitest';
+
 import {
   toFriendlyError,
   BadRequestError,
   UnauthorizedError,
   ForbiddenError,
-} from './errors';
+} from './errors.js';
 
 describe('toFriendlyError', () => {
   it('should return the original error if it is not an object', () => {
