@@ -37,8 +37,10 @@ describe('ide-installer', () => {
       // We get a new installer for each test to reset the find command logic
       installer = getIdeInstaller(DetectedIde.VSCode)!;
       vi.spyOn(child_process, 'execSync').mockImplementation(() => '');
+      vi.spyOn(child_process, 'execFileSync').mockImplementation(() => '');
       vi.spyOn(fs, 'existsSync').mockReturnValue(false);
       vi.spyOn(os, 'homedir').mockReturnValue('/home/user');
+      vi.spyOn(os, 'platform').mockReturnValue('linux');
     });
 
     afterEach(() => {
@@ -48,6 +50,9 @@ describe('ide-installer', () => {
     describe('install', () => {
       it('should return a failure message if VS Code is not installed', async () => {
         vi.spyOn(child_process, 'execSync').mockImplementation(() => {
+          throw new Error('Command not found');
+        });
+        vi.spyOn(child_process, 'execFileSync').mockImplementation(() => {
           throw new Error('Command not found');
         });
         vi.spyOn(fs, 'existsSync').mockReturnValue(false);
