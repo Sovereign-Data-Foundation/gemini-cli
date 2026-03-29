@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as Diff from 'diff';
 import {
@@ -126,7 +126,7 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
       | undefined = undefined;
 
     try {
-      currentContent = fs.readFileSync(params.file_path, 'utf8');
+      currentContent = await fs.readFile(params.file_path, 'utf8');
       // Normalize line endings to LF for consistent processing.
       currentContent = currentContent.replace(/\r\n/g, '\n');
       fileExists = true;
@@ -340,8 +340,8 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
     }
 
     try {
-      this.ensureParentDirectoriesExist(this.params.file_path);
-      fs.writeFileSync(this.params.file_path, editData.newContent, 'utf8');
+      await this.ensureParentDirectoriesExist(this.params.file_path);
+      await fs.writeFile(this.params.file_path, editData.newContent, 'utf8');
 
       let displayResult: ToolResultDisplay;
       if (editData.isNewFile) {
@@ -406,10 +406,14 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
   /**
    * Creates parent directories if they don't exist
    */
-  private ensureParentDirectoriesExist(filePath: string): void {
+  private async ensureParentDirectoriesExist(filePath: string): Promise<void> {
     const dirName = path.dirname(filePath);
-    if (!fs.existsSync(dirName)) {
-      fs.mkdirSync(dirName, { recursive: true });
+    try {
+      await fs.mkdir(dirName, { recursive: true });
+    } catch (err: unknown) {
+      if (!isNodeError(err) || err.code !== 'EEXIST') {
+        throw err;
+      }
     }
   }
 }
@@ -503,7 +507,7 @@ Expectation for required parameters:
       getFilePath: (params: EditToolParams) => params.file_path,
       getCurrentContent: async (params: EditToolParams): Promise<string> => {
         try {
-          return fs.readFileSync(params.file_path, 'utf8');
+          return await fs.readFile(params.file_path, 'utf8');
         } catch (err) {
           if (!isNodeError(err) || err.code !== 'ENOENT') throw err;
           return '';
@@ -511,7 +515,7 @@ Expectation for required parameters:
       },
       getProposedContent: async (params: EditToolParams): Promise<string> => {
         try {
-          const currentContent = fs.readFileSync(params.file_path, 'utf8');
+          const currentContent = await fs.readFile(params.file_path, 'utf8');
           return applyReplacement(
             currentContent,
             params.old_string,
