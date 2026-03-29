@@ -136,8 +136,8 @@ class VsCodeInstaller implements IdeInstaller {
         ['--install-extension', vsixPath, '--force'],
         {
           stdio: 'pipe',
-          shell: os.platform() === 'win32' && commandPath.endsWith('.cmd')
-        }
+          shell: os.platform() === 'win32' && commandPath.endsWith('.cmd'),
+        },
       );
       return {
         success: true,
