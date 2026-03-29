@@ -13,6 +13,7 @@ import {
   CommandKind,
 } from './types.js';
 import { Config } from '@google/gemini-cli-core';
+import { z } from 'zod';
 
 async function restoreAction(
   context: CommandContext,
@@ -76,7 +77,27 @@ async function restoreAction(
 
     const filePath = path.join(checkpointDir, selectedFile);
     const data = await fs.readFile(filePath, 'utf-8');
-    const toolCallData = JSON.parse(data);
+    const parsedData = JSON.parse(data);
+
+    const toolCallDataSchema = z.object({
+      history: z.array(z.any()).optional(),
+      clientHistory: z.array(z.any()).optional(),
+      commitHash: z.string().optional(),
+      toolCall: z.object({
+        name: z.string(),
+        args: z.any(),
+      }).optional(),
+    });
+
+    const toolCallData = toolCallDataSchema.parse(parsedData);
+
+    if (!toolCallData.toolCall) {
+      return {
+        type: 'message',
+        messageType: 'error',
+        content: 'Checkpoint file is missing toolCall data.',
+      };
+    }
 
     if (toolCallData.history) {
       if (!loadHistory) {
