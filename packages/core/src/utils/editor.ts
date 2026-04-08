@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { execSync, spawn, spawnSync } from 'child_process';
+import { execFileSync, spawn, spawnSync } from 'child_process';
 
 export type EditorType =
   | 'vscode'
@@ -36,10 +36,11 @@ interface DiffCommand {
 
 function commandExists(cmd: string): boolean {
   try {
-    execSync(
-      process.platform === 'win32' ? `where.exe ${cmd}` : `command -v ${cmd}`,
-      { stdio: 'ignore' },
-    );
+    if (process.platform === 'win32') {
+      execFileSync('where.exe', [cmd], { stdio: 'ignore' });
+    } else {
+      execFileSync('which', [cmd], { stdio: 'ignore' });
+    }
     return true;
   } catch {
     return false;
