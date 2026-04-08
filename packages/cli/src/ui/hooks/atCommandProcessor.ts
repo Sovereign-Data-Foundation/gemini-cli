@@ -169,40 +169,23 @@ export async function handleAtCommand({
     return { processedQuery: null, shouldProceed: false };
   }
 
-  for (const atPathPart of atPathCommandParts) {
+  const resolutionPromises = atPathCommandParts.map(async (atPathPart) => {
     const originalAtPath = atPathPart.content; // e.g., "@file.txt" or "@"
 
     if (originalAtPath === '@') {
-      onDebugMessage(
-        'Lone @ detected, will be treated as text in the modified query.',
-      );
-      continue;
+      return { type: 'loneAt' };
     }
 
     const pathName = originalAtPath.substring(1);
     if (!pathName) {
-      // This case should ideally not be hit if parseAllAtCommands ensures content after @
-      // but as a safeguard:
-      addItem(
-        {
-          type: 'error',
-          text: `Error: Invalid @ command '${originalAtPath}'. No path specified.`,
-        },
-        userMessageTimestamp,
-      );
-      // Decide if this is a fatal error for the whole command or just skip this @ part
-      // For now, let's be strict and fail the command if one @path is malformed.
-      return { processedQuery: null, shouldProceed: false };
+      return { type: 'error', originalAtPath };
     }
 
     // Check if path should be ignored based on filtering options
 
     const workspaceContext = config.getWorkspaceContext();
     if (!workspaceContext.isPathWithinWorkspace(pathName)) {
-      onDebugMessage(
-        `Path ${pathName} is not in the workspace and will be skipped.`,
-      );
-      continue;
+      return { type: 'skipped', pathName, reason: 'outside_workspace' };
     }
 
     const gitIgnored =
@@ -221,15 +204,7 @@ export async function handleAtCommand({
     if (gitIgnored || geminiIgnored) {
       const reason =
         gitIgnored && geminiIgnored ? 'both' : gitIgnored ? 'git' : 'gemini';
-      ignoredByReason[reason].push(pathName);
-      const reasonText =
-        reason === 'both'
-          ? 'ignored by both git and gemini'
-          : reason === 'git'
-            ? 'git-ignored'
-            : 'gemini-ignored';
-      onDebugMessage(`Path ${pathName} is ${reasonText} and will be skipped.`);
-      continue;
+      return { type: 'ignored', pathName, reason };
     }
 
     for (const dir of config.getWorkspaceContext().getDirectories()) {
@@ -309,11 +284,53 @@ export async function handleAtCommand({
         }
       }
       if (resolvedSuccessfully) {
-        pathSpecsToRead.push(currentPathSpec);
-        atPathToResolvedSpecMap.set(originalAtPath, currentPathSpec);
-        contentLabelsForDisplay.push(pathName);
-        break;
+        return {
+          type: 'resolved',
+          originalAtPath,
+          pathName,
+          currentPathSpec,
+        };
       }
+    }
+    return { type: 'skipped', pathName, reason: 'not_found' };
+  });
+
+  const resolutionResults = await Promise.all(resolutionPromises);
+
+  for (const result of resolutionResults) {
+    if (result.type === 'loneAt') {
+      onDebugMessage(
+        'Lone @ detected, will be treated as text in the modified query.',
+      );
+    } else if (result.type === 'error') {
+      addItem(
+        {
+          type: 'error',
+          text: `Error: Invalid @ command '${result.originalAtPath}'. No path specified.`,
+        },
+        userMessageTimestamp,
+      );
+      return { processedQuery: null, shouldProceed: false };
+    } else if (result.type === 'skipped') {
+      if (result.reason === 'outside_workspace') {
+        onDebugMessage(
+          `Path ${result.pathName} is not in the workspace and will be skipped.`,
+        );
+      }
+    } else if (result.type === 'ignored') {
+      const { pathName, reason } = result;
+      ignoredByReason[reason].push(pathName);
+      const reasonText =
+        reason === 'both'
+          ? 'ignored by both git and gemini'
+          : reason === 'git'
+            ? 'git-ignored'
+            : 'gemini-ignored';
+      onDebugMessage(`Path ${pathName} is ${reasonText} and will be skipped.`);
+    } else if (result.type === 'resolved') {
+      pathSpecsToRead.push(result.currentPathSpec);
+      atPathToResolvedSpecMap.set(result.originalAtPath, result.currentPathSpec);
+      contentLabelsForDisplay.push(result.pathName);
     }
   }
 
