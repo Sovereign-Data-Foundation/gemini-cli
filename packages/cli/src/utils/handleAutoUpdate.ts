@@ -10,7 +10,8 @@ import { getInstallationInfo } from './installationInfo.js';
 import { updateEventEmitter } from './updateEventEmitter.js';
 import { HistoryItem, MessageType } from '../ui/types.js';
 import { spawnWrapper } from './spawnWrapper.js';
-import { spawn } from 'child_process';
+import type { spawn } from 'child_process';
+import { parse } from 'shell-quote';
 
 export function handleAutoUpdate(
   info: UpdateObject | null,
@@ -49,7 +50,24 @@ export function handleAutoUpdate(
     '@latest',
     isNightly ? '@nightly' : `@${info.update.latest}`,
   );
-  const updateProcess = spawnFn(updateCommand, { stdio: 'pipe', shell: true });
+  const parsedCommand = parse(updateCommand).filter(
+    (arg): arg is string => typeof arg === 'string',
+  );
+
+  if (parsedCommand.length === 0) {
+    updateEventEmitter.emit('update-failed', {
+      message: `Automatic update failed. Invalid update command: ${updateCommand}`,
+    });
+    return;
+  }
+
+  const updateProcess = spawnFn(parsedCommand[0], parsedCommand.slice(1), {
+    stdio: 'pipe',
+    // On Windows, we need shell: true to execute .cmd/.bat files like npm/yarn.
+    // However, we are passing an array of arguments, which Node.js handles
+    // more safely than a single command string even with shell: true.
+    shell: process.platform === 'win32',
+  });
   let errorOutput = '';
   updateProcess.stderr.on('data', (data) => {
     errorOutput += data.toString();
