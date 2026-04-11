@@ -174,7 +174,14 @@ describe('handleAutoUpdate', () => {
 
     handleAutoUpdate(mockUpdateInfo, mockSettings, '/root', mockSpawn);
 
-    expect(mockSpawn).toHaveBeenCalledOnce();
+    expect(mockSpawn).toHaveBeenCalledWith(
+      'npm',
+      ['i', '-g', '@google/gemini-cli@2.0.0'],
+      {
+        shell: process.platform === 'win32',
+        stdio: 'pipe',
+      },
+    );
   });
 
   it('should emit "update-failed" when the update process fails', async () => {
@@ -238,9 +245,10 @@ describe('handleAutoUpdate', () => {
     handleAutoUpdate(mockUpdateInfo, mockSettings, '/root', mockSpawn);
 
     expect(mockSpawn).toHaveBeenCalledWith(
-      'npm i -g @google/gemini-cli@nightly',
+      'npm',
+      ['i', '-g', '@google/gemini-cli@nightly'],
       {
-        shell: true,
+        shell: process.platform === 'win32',
         stdio: 'pipe',
       },
     );
