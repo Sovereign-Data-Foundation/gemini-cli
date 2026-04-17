@@ -54,7 +54,6 @@ describe('ShellExecutionService', () => {
     mockChildProcess.stderr = new EventEmitter() as Readable;
     mockChildProcess.kill = vi.fn();
 
-    // FIX: Use Object.defineProperty to set the readonly 'pid' property.
     Object.defineProperty(mockChildProcess, 'pid', {
       value: 12345,
       configurable: true,
