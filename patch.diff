@@ -1,0 +1,23 @@
+--- packages/cli/src/config/config.ts
++++ packages/cli/src/config/config.ts
+@@ -272,8 +272,18 @@
+   fileFilteringOptions?: FileFilteringOptions,
+ ): Promise<{ memoryContent: string; fileCount: number }> {
+   // FIX: Use real, canonical paths for a reliable comparison to handle symlinks.
+-  const realCwd = fs.realpathSync(path.resolve(currentWorkingDirectory));
+-  const realHome = fs.realpathSync(path.resolve(homedir()));
++  const resolveRealpath = (p: string) => {
++    const resolvedPath = path.resolve(p);
++    try {
++      return fs.realpathSync(resolvedPath);
++    } catch {
++      // Fallback to resolved path if realpathSync fails (e.g., if the path doesn't exist)
++      return resolvedPath;
++    }
++  };
++
++  const realCwd = resolveRealpath(currentWorkingDirectory);
++  const realHome = resolveRealpath(homedir());
+   const isHomeDirectory = realCwd === realHome;
+
+   // If it is the home directory, pass an empty string to the core memory
