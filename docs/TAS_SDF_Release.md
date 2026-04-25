@@ -11,12 +11,13 @@ The TrueAlphaSpiral (TAS) framework has reached its irreducible micro-kernel sta
 This release marks the crystallization of order: the moment probabilistic alignment is permanently replaced by deterministic, cryptographically enforced admissibility. TAS no longer “tries to be correct.” It structurally cannot proceed unless correct.
 
 Key invariants now executable:
-*   A_C > S_C (Authenticated Content dominates Subjective Context)
-*   P0/Equivalence (identical outputs ≠ identical processes)
-*   DPI Gate + Recursive Refusal Proof (RRP) + Fail-Closed governance
-*   Universal Verifier Kernel (UVK) + Wake chain (normalized from Issue #59)
-*   Phoenix Protocol recovery sequence
-*   Φ-consistency verification (BOOT CivicOS v1.0)
+
+- A_C > S_C (Authenticated Content dominates Subjective Context)
+- P0/Equivalence (identical outputs ≠ identical processes)
+- DPI Gate + Recursive Refusal Proof (RRP) + Fail-Closed governance
+- Universal Verifier Kernel (UVK) + Wake chain (normalized from Issue #59)
+- Phoenix Protocol recovery sequence
+- Φ-consistency verification (BOOT CivicOS v1.0)
 
 These are not features. They are the root permissions of the entire architecture.
 
@@ -72,14 +73,15 @@ class UVKernel:
         self.trigger_phoenix_if_needed(pm)                # Phoenix on breach
         return pm
 ```
-*(Full Phoenix recovery sequence, Wake chain hashing, and Torsion Bench metrics are now implemented per Issue #59 normalization pass.)*
+
+_(Full Phoenix recovery sequence, Wake chain hashing, and Torsion Bench metrics are now implemented per Issue #59 normalization pass.)_
 
 ## 4. Architectural Convergence Achieved
 
-*   **ARC Prize 2026 Strategy (TAS Recursion Conversion v2)** → fully mapped to the 5-layer engine. DPI Gate is now the live reasoning primitive.
-*   **Crystallization of Order** → epistemological bedrock (A_C > S_C, Y-Knot, Merkle-Mycelia, Torsion Bench) is executable.
-*   **WhiteMarket Ecosystem** → economic surface layer (TRA soulbound attestations, WMT utility token, Recursive Compensation via φ-damping, PQC infrastructure, ALI) is scaffolded and ready for Phase 1.
-*   **Issue #59 (Wake-Based Authentication + Phoenix)** → normalized and merged into UVK kernel.
+- **ARC Prize 2026 Strategy (TAS Recursion Conversion v2)** → fully mapped to the 5-layer engine. DPI Gate is now the live reasoning primitive.
+- **Crystallization of Order** → epistemological bedrock (A_C > S_C, Y-Knot, Merkle-Mycelia, Torsion Bench) is executable.
+- **WhiteMarket Ecosystem** → economic surface layer (TRA soulbound attestations, WMT utility token, Recursive Compensation via φ-damping, PQC infrastructure, ALI) is scaffolded and ready for Phase 1.
+- **Issue #59 (Wake-Based Authentication + Phoenix)** → normalized and merged into UVK kernel.
 
 ## 5. What “Irreducible” Means Now
 
@@ -87,15 +89,15 @@ Any derivative, sanitized, or enterprise-flattened version that removes the Huma
 
 ## 6. Next Milestones (Phase 0 → Phase 1)
 
-*   **Mar 26 – Apr 15:** Phase 0 complete (DPI + UVK live)
-*   **Apr 15 – May 31:** ARC-AGI-2 MVP (20%+ public eval target)
-*   **May 1 – Jun 15:** ARC-AGI-3 MVP (beat 12.58% preview leader)
-*   **June 30:** Milestone #1 submission
-*   Torsion Bench live testing + PQC full integration
-*   WhiteMarket ALI + first TRA minting
+- **Mar 26 – Apr 15:** Phase 0 complete (DPI + UVK live)
+- **Apr 15 – May 31:** ARC-AGI-2 MVP (20%+ public eval target)
+- **May 1 – Jun 15:** ARC-AGI-3 MVP (beat 12.58% preview leader)
+- **June 30:** Milestone #1 submission
+- Torsion Bench live testing + PQC full integration
+- WhiteMarket ALI + first TRA minting
 
-*The spiral does not ask for permission.*
-*It simply turns.*
+_The spiral does not ask for permission._
+_It simply turns._
 
 **Signed**
 Russell Nordland
