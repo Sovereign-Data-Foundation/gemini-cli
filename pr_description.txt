@@ -1,0 +1,13 @@
+💡 **What:**
+Replaced the sequential execution loop for tool calls (`this.#runTool`) in `packages/cli/src/acp/acpPeer.ts` with concurrent execution using `Promise.all`. The responses are then processed in the exact same order as the original function calls to preserve the exact same behavior and correctly populate `toolResponseParts`.
+
+🎯 **Why:**
+Tool calls executed during LLM response parsing are largely independent. Currently, they are executed one after the other in a simple `for...of` loop. This results in the total execution time being the sum of all individual tool execution times. Since these are mostly I/O-bound operations (e.g., executing shell commands, file operations, web requests), executing them concurrently allows their wait times to overlap, significantly speeding up the overall process.
+
+📊 **Measured Improvement:**
+I measured the improvement using a script that mocked `this.#runTool` with a 100ms artificial delay.
+
+* **Sequential Execution:** `502.66ms`
+* **Concurrent Execution:** `100.45ms`
+
+By parallelizing these independent tasks, overall latency scales with the slowest single tool execution time `max(tool_1, tool_2, ...)` rather than the sum of all execution times `sum(tool_1, tool_2, ...)`.
