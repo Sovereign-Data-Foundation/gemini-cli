@@ -32,12 +32,18 @@ function writeInstallationIdToFile(installationId: string) {
   fs.writeFileSync(installationIdFile, installationId, 'utf-8');
 }
 
+let cachedInstallationId: string | null = null;
+
 /**
  * Retrieves the installation ID from a file, creating it if it doesn't exist.
  * This ID is used for unique user installation tracking.
  * @returns A UUID string for the user.
  */
 export function getInstallationId(): string {
+  if (cachedInstallationId) {
+    return cachedInstallationId;
+  }
+
   try {
     ensureGeminiDirExists();
     let installationId = readInstallationIdFromFile();
@@ -47,6 +53,7 @@ export function getInstallationId(): string {
       writeInstallationIdToFile(installationId);
     }
 
+    cachedInstallationId = installationId;
     return installationId;
   } catch (error) {
     console.error(
