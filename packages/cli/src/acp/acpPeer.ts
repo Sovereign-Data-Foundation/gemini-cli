@@ -169,13 +169,13 @@ class GeminiAgent implements Agent {
       if (functionCalls.length > 0) {
         const toolResponseParts: Part[] = [];
 
-        for (const fc of functionCalls) {
-          const response = await this.#runTool(
-            pendingSend.signal,
-            promptId,
-            fc,
-          );
+        const responses = await Promise.all(
+          functionCalls.map((fc) =>
+            this.#runTool(pendingSend.signal, promptId, fc),
+          ),
+        );
 
+        for (const response of responses) {
           const parts = Array.isArray(response) ? response : [response];
 
           for (const part of parts) {
