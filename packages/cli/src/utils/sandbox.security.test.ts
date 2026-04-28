@@ -1,3 +1,9 @@
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as cp from 'node:child_process';
 import * as fs from 'node:fs';
@@ -155,9 +161,7 @@ describe('sandbox security', () => {
       mockP.stdout = { ...baseMockProcess.stdout };
 
       if (isProxy) {
-        mockP.on.mockImplementation((event, cb) => {
-          return mockP;
-        });
+        mockP.on.mockImplementation((event, cb) => mockP);
         mockP.pid = 999;
       } else if (isSandbox) {
         mockP.on.mockImplementation((event, cb) => {
