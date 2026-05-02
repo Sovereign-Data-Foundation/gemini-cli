@@ -275,11 +275,9 @@ export class WriteFileTool
 
     try {
       const dirName = path.dirname(params.file_path);
-      if (!fs.existsSync(dirName)) {
-        fs.mkdirSync(dirName, { recursive: true });
-      }
+      await fs.promises.mkdir(dirName, { recursive: true });
 
-      fs.writeFileSync(params.file_path, fileContent, 'utf8');
+      await fs.promises.writeFile(params.file_path, fileContent, 'utf8');
 
       // Generate diff for display result
       const fileName = path.basename(params.file_path);
@@ -406,7 +404,7 @@ export class WriteFileTool
     let correctedContent = proposedContent;
 
     try {
-      originalContent = fs.readFileSync(filePath, 'utf8');
+      originalContent = await fs.promises.readFile(filePath, 'utf8');
       fileExists = true; // File exists and was read
     } catch (err) {
       if (isNodeError(err) && err.code === 'ENOENT') {
