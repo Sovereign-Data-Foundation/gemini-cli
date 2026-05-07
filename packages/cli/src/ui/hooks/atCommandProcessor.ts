@@ -169,30 +169,24 @@ export async function handleAtCommand({
     return { processedQuery: null, shouldProceed: false };
   }
 
-  for (const atPathPart of atPathCommandParts) {
+  const resolutionPromises = atPathCommandParts.map(async (atPathPart) => {
     const originalAtPath = atPathPart.content; // e.g., "@file.txt" or "@"
 
     if (originalAtPath === '@') {
       onDebugMessage(
         'Lone @ detected, will be treated as text in the modified query.',
       );
-      continue;
+      return null;
     }
 
     const pathName = originalAtPath.substring(1);
     if (!pathName) {
       // This case should ideally not be hit if parseAllAtCommands ensures content after @
       // but as a safeguard:
-      addItem(
-        {
-          type: 'error',
-          text: `Error: Invalid @ command '${originalAtPath}'. No path specified.`,
-        },
-        userMessageTimestamp,
-      );
-      // Decide if this is a fatal error for the whole command or just skip this @ part
-      // For now, let's be strict and fail the command if one @path is malformed.
-      return { processedQuery: null, shouldProceed: false };
+      return {
+        error: true,
+        errorMessage: `Error: Invalid @ command '${originalAtPath}'. No path specified.`,
+      };
     }
 
     // Check if path should be ignored based on filtering options
@@ -202,7 +196,7 @@ export async function handleAtCommand({
       onDebugMessage(
         `Path ${pathName} is not in the workspace and will be skipped.`,
       );
-      continue;
+      return null;
     }
 
     const gitIgnored =
@@ -221,7 +215,7 @@ export async function handleAtCommand({
     if (gitIgnored || geminiIgnored) {
       const reason =
         gitIgnored && geminiIgnored ? 'both' : gitIgnored ? 'git' : 'gemini';
-      ignoredByReason[reason].push(pathName);
+
       const reasonText =
         reason === 'both'
           ? 'ignored by both git and gemini'
@@ -229,7 +223,7 @@ export async function handleAtCommand({
             ? 'git-ignored'
             : 'gemini-ignored';
       onDebugMessage(`Path ${pathName} is ${reasonText} and will be skipped.`);
-      continue;
+      return { ignored: true, reason, pathName };
     }
 
     for (const dir of config.getWorkspaceContext().getDirectories()) {
@@ -309,11 +303,45 @@ export async function handleAtCommand({
         }
       }
       if (resolvedSuccessfully) {
-        pathSpecsToRead.push(currentPathSpec);
-        atPathToResolvedSpecMap.set(originalAtPath, currentPathSpec);
-        contentLabelsForDisplay.push(pathName);
-        break;
+        return {
+          success: true,
+          currentPathSpec,
+          originalAtPath,
+          pathName,
+        };
       }
+    }
+    return null;
+  });
+
+  const resolutionResults = await Promise.all(resolutionPromises);
+
+  for (const result of resolutionResults) {
+    if (!result) continue;
+
+    if ('error' in result && result.error) {
+      addItem(
+        {
+          type: 'error',
+          text: result.errorMessage!,
+        },
+        userMessageTimestamp,
+      );
+      return { processedQuery: null, shouldProceed: false };
+    }
+
+    if ('ignored' in result && result.ignored) {
+      ignoredByReason[result.reason!].push(result.pathName!);
+      continue;
+    }
+
+    if ('success' in result && result.success) {
+      pathSpecsToRead.push(result.currentPathSpec!);
+      atPathToResolvedSpecMap.set(
+        result.originalAtPath!,
+        result.currentPathSpec!,
+      );
+      contentLabelsForDisplay.push(result.pathName!);
     }
   }
 
