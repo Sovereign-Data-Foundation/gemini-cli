@@ -18,7 +18,7 @@ Rather than merely translating commands, Pythonetics preserves the authorization
 \text{audit and replay}
 \]
 
-<img src="../assets/pythonetics-kinetic-proof-bridge.png" alt="Pythonetics kinetic proof bridge linking reflective proof, C# sandbox execution, attestation receipts, and audit replay." />
+<img src="<img>" alt="Pythonetics kinetic proof bridge linking reflective proof, C# sandbox execution, attestation receipts, and audit replay." />
 
 ## 2. Language roles in TAS
 
@@ -47,9 +47,9 @@ The attestation object is therefore not only a runtime log; it is a compact proo
 
 This execution loop is a kinetic miniature of the Triadic Knowledge Engine. Let \(x_n\) denote runtime state at tick \(n\), and \(T\) denote the command-processing operator:
 
-\[
-x\_{n+1} = T(x_n)
-\]
+$$
+x_{n+1} = T(x_n)
+$$
 
 If \(T\) is contractive under metric \(d\), with Lipschitz bound \(0 \le \kappa < 1\),
 
