@@ -18,7 +18,7 @@ $$
 \text{audit and replay}
 $$
 
-<img src="../assets/pythonetics-kinetic-proof-bridge.png" width="1200" height="280" alt="Pythonetics proof bridge architecture diagram." />
+<img src="../assets/pythonetics-kinetic-proof-bridge.png" width="1200" height="280" alt="Flow from proof logic to command grammar, sandbox execution, attestation artifact, and audit replay." />
 
 ## 2. Language roles in TAS
 
