@@ -18,7 +18,7 @@ $$
 \text{audit and replay}
 $$
 
-<img src="../assets/pythonetics-kinetic-proof-bridge.png" width="1200" height="280" alt="Flowchart linking proof logic to command grammar, C# sandbox execution, attestation artifact, and audit-replay feedback." />
+<img src="../assets/pythonetics-kinetic-proof-bridge.png" alt="Flowchart linking proof logic to command grammar, C# sandbox execution, attestation artifact, and audit-replay feedback." />
 
 ## 2. Language roles in TAS
 
@@ -51,7 +51,7 @@ $$
 x_{n+1} = T(x_n)
 $$
 
-If $T$ is contractive under metric $d$, with Lipschitz bound $0 \le \kappa < 1$,
+If T is contractive under metric d, with Lipschitz bound 0 ≤ κ < 1,
 
 $$
 d(Tx, Ty) \le \kappa d(x, y),
