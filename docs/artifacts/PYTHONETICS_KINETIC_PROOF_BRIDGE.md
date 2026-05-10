@@ -18,7 +18,7 @@ Rather than merely translating commands, Pythonetics preserves the authorization
 \text{audit and replay}
 \]
 
-<img src="<img>" alt="Pythonetics kinetic proof bridge linking reflective proof, C# sandbox execution, attestation receipts, and audit replay." />
+<img src="../assets/pythonetics-kinetic-proof-bridge.png" alt="Pythonetics kinetic proof bridge linking reflective proof, C# sandbox execution, attestation receipts, and audit replay." />
 
 ## 2. Language roles in TAS
 
