@@ -51,7 +51,7 @@ $$
 x_{n+1} = T(x_n)
 $$
 
-If T is contractive under metric d, with Lipschitz bound 0 ≤ κ < 1,
+If T is contractive under metric d, with Lipschitz bound $0 \le \kappa < 1$,
 
 $$
 d(Tx, Ty) \le \kappa d(x, y),
