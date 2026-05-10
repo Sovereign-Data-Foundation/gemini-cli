@@ -6,7 +6,7 @@ Pythonetics is not Python syntax. It is the recursive constraint discipline that
 
 Rather than merely translating commands, Pythonetics preserves the authorization conditions under which action is allowed, bounded, and auditable. It is the continuity layer that prevents proof from collapsing into unaudited execution.
 
-\[
+$$
 \text{proof logic}
 \rightarrow
 \text{command grammar}
@@ -16,9 +16,9 @@ Rather than merely translating commands, Pythonetics preserves the authorization
 \text{attestation artifact}
 \rightarrow
 \text{audit and replay}
-\]
+$$
 
-<img src="../assets/pythonetics-kinetic-proof-bridge.png" alt="Pythonetics proof bridge architecture diagram." />
+<img src="../assets/pythonetics-kinetic-proof-bridge.png" width="1200" height="280" alt="Pythonetics proof bridge architecture diagram." />
 
 ## 2. Language roles in TAS
 
