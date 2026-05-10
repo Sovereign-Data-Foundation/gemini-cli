@@ -53,9 +53,9 @@ $$
 
 If \(T\) is contractive under metric \(d\), with Lipschitz bound \(0 \le \kappa < 1\),
 
-\[
+$$
 d(Tx, Ty) \le \kappa d(x, y),
-\]
+$$
 
 then Banach fixed-point theory guarantees convergence to a unique fixed point.
 
