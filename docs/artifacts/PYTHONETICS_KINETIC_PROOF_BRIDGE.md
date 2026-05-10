@@ -87,4 +87,4 @@ Under contraction assumptions (\(\kappa < 1\)), iterative runtime application ad
 
 ## Appendix B: Attestation surface summary
 
-The proof receipt is preserved as structured fields covering identity binding, queue lineage hash, command/tick counters, drift and refusal markers, and timestamped execution boundaries. This enables deterministic audit, replay, and refinement loops from Python after C# kinetic execution.
+An attestation surface is the minimal, machine-readable boundary where runtime state is exposed for verification and replay. The proof receipt is preserved as structured fields covering identity binding, queue lineage hash, command/tick counters, drift and refusal markers, and timestamped execution boundaries. This enables deterministic audit, replay, and refinement loops from Python after C# kinetic execution.
