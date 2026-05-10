@@ -45,7 +45,7 @@ The attestation object is therefore not only a runtime log; it is a compact proo
 
 ## 4. Mathematical anchor
 
-This execution loop is a kinetic miniature of the Triadic Knowledge Engine. Let \(x_n\) denote runtime state at tick \(n\), and \(T\) denote the command-processing operator:
+This execution loop is a kinetic miniature of the Triadic Knowledge Engine. Let $x_n$ denote runtime state at tick $n$, and $T$ denote the command-processing operator:
 
 $$
 x_{n+1} = T(x_n)
@@ -75,8 +75,8 @@ A command sequence is trustworthy only if it remains reconstructible: readable, 
 
 ## 6. Closing axiom
 
-> Python thinks.<br />
-> C# acts.<br />
+> Python thinks.
+> C# acts.
 > Pythonetics remembers why the action was allowed.
 
 This triad expresses TAS accountability: intelligence must remain answerable to the conditions of its own authorization.
