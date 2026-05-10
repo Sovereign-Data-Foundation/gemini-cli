@@ -306,14 +306,10 @@ export async function start_sandbox(
           );
           process.exit(1);
         }
-        proxyProcess = spawn(
-          parsedProxyCommand[0],
-          parsedProxyCommand.slice(1),
-          {
-            stdio: ['ignore', 'pipe', 'pipe'],
-            detached: true,
-          },
-        );
+        proxyProcess = spawn(parsedProxyCommand[0], parsedProxyCommand.slice(1), {
+          stdio: ['ignore', 'pipe', 'pipe'],
+          detached: true,
+        });
         // install handlers to stop proxy on exit/signal
         const stopProxy = () => {
           console.log('stopping proxy ...');
