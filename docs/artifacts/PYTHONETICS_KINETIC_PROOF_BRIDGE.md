@@ -18,7 +18,7 @@ Rather than merely translating commands, Pythonetics preserves the authorization
 \text{audit and replay}
 \]
 
-<img src="../assets/pythonetics-kinetic-proof-bridge.png" alt="Pythonetics kinetic proof bridge linking reflective proof, C# sandbox execution, attestation receipts, and audit replay." />
+<img src="../assets/pythonetics-kinetic-proof-bridge.png" alt="Pythonetics proof bridge architecture diagram." />
 
 ## 2. Language roles in TAS
 
@@ -75,8 +75,8 @@ A command sequence is trustworthy only if it remains reconstructible: readable, 
 
 ## 6. Closing axiom
 
-> Python thinks.  
-> C# acts.  
+> Python thinks.<br />
+> C# acts.<br />
 > Pythonetics remembers why the action was allowed.
 
 This triad expresses TAS accountability: intelligence must remain answerable to the conditions of its own authorization.
