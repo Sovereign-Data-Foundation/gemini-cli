@@ -29,17 +29,22 @@ describe('RecursiveRuntime', () => {
   it('should return a valid VerifiedGene when a contractive path is found', () => {
     // 100 * (1 / 1.618033988749895) is approx 61.8
     // So target is 61.8, we return 60 to satisfy the condition
-    const calculateMetricSpy = vi.spyOn(BanachCurationOperator.prototype, 'calculateMetric')
+    const calculateMetricSpy = vi
+      .spyOn(BanachCurationOperator.prototype, 'calculateMetric')
       .mockReturnValueOnce(100) // First call: original failedState delta
       .mockReturnValueOnce(60); // Second call: recomputed content delta
 
-    const applySpy = vi.spyOn(BanachCurationOperator.prototype, 'apply')
+    const applySpy = vi
+      .spyOn(BanachCurationOperator.prototype, 'apply')
       .mockReturnValue('contracted');
 
     const result = runtime.recompute('failed_state_content', mockSeed);
 
     expect(calculateMetricSpy).toHaveBeenCalledTimes(2);
-    expect(calculateMetricSpy).toHaveBeenNthCalledWith(1, 'failed_state_content');
+    expect(calculateMetricSpy).toHaveBeenNthCalledWith(
+      1,
+      'failed_state_content',
+    );
     expect(calculateMetricSpy).toHaveBeenNthCalledWith(2, 'contracted');
     expect(applySpy).toHaveBeenCalledTimes(1);
     expect(applySpy).toHaveBeenCalledWith('failed_state_content');
@@ -61,17 +66,22 @@ describe('RecursiveRuntime', () => {
   it('should return null when a contractive path is not found', () => {
     // 100 * (1 / 1.618033988749895) is approx 61.8
     // So target is 61.8, we return 80 to fail the condition
-    const calculateMetricSpy = vi.spyOn(BanachCurationOperator.prototype, 'calculateMetric')
+    const calculateMetricSpy = vi
+      .spyOn(BanachCurationOperator.prototype, 'calculateMetric')
       .mockReturnValueOnce(100) // First call: original failedState delta
       .mockReturnValueOnce(80); // Second call: recomputed content delta
 
-    const applySpy = vi.spyOn(BanachCurationOperator.prototype, 'apply')
+    const applySpy = vi
+      .spyOn(BanachCurationOperator.prototype, 'apply')
       .mockReturnValue('contracted');
 
     const result = runtime.recompute('failed_state_content', mockSeed);
 
     expect(calculateMetricSpy).toHaveBeenCalledTimes(2);
-    expect(calculateMetricSpy).toHaveBeenNthCalledWith(1, 'failed_state_content');
+    expect(calculateMetricSpy).toHaveBeenNthCalledWith(
+      1,
+      'failed_state_content',
+    );
     expect(calculateMetricSpy).toHaveBeenNthCalledWith(2, 'contracted');
     expect(applySpy).toHaveBeenCalledTimes(1);
     expect(applySpy).toHaveBeenCalledWith('failed_state_content');
