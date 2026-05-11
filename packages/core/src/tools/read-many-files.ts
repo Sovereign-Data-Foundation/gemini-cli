@@ -343,6 +343,9 @@ Use this tool when the user's query implies needing the content of several files
             .map((p) => path.resolve(this.config.getTargetDir(), p))
         : gitFilteredEntries;
 
+      const gitFilteredEntriesSet = new Set(gitFilteredEntries);
+      const finalFilteredEntriesSet = new Set(finalFilteredEntries);
+
       let gitIgnoredCount = 0;
       let geminiIgnoredCount = 0;
 
@@ -363,7 +366,7 @@ Use this tool when the user's query implies needing the content of several files
         // Check if this file was filtered out by git ignore
         if (
           fileFilteringOptions.respectGitIgnore &&
-          !gitFilteredEntries.includes(absoluteFilePath)
+          !gitFilteredEntriesSet.has(absoluteFilePath)
         ) {
           gitIgnoredCount++;
           continue;
@@ -372,7 +375,7 @@ Use this tool when the user's query implies needing the content of several files
         // Check if this file was filtered out by gemini ignore
         if (
           fileFilteringOptions.respectGeminiIgnore &&
-          !finalFilteredEntries.includes(absoluteFilePath)
+          !finalFilteredEntriesSet.has(absoluteFilePath)
         ) {
           geminiIgnoredCount++;
           continue;
