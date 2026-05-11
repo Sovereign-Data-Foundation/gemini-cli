@@ -50,9 +50,7 @@ import {
   type IdeContext,
   ideContext,
 } from '@google/gemini-cli-core';
-import {
-  IdeIntegrationNudgeResult,
-} from './IdeIntegrationNudge.js';
+import { IdeIntegrationNudgeResult } from './IdeIntegrationNudge.js';
 import { validateAuthMethod } from '../config/auth.js';
 import { useLogger } from './hooks/useLogger.js';
 import { StreamingContext } from './contexts/StreamingContext.js';
@@ -810,22 +808,24 @@ const App = ({ config, settings, startupWarnings = [], version }: AppProps) => {
   const placeholder = vimModeEnabled
     ? "  Press 'i' for INSERT mode and 'Esc' for NORMAL mode."
     : '  Type your message or @path/to/file';
-  const inputPromptProps: InputPromptProps = {
-    buffer,
-    inputWidth,
-    suggestionsWidth,
-    onSubmit: handleFinalSubmit,
-    userMessages,
-    onClearScreen: handleClearScreen,
-    config,
-    slashCommands,
-    commandContext,
-    shellModeActive,
-    setShellModeActive,
-    focus: isFocused,
-    vimHandleInput,
-    placeholder,
-  };
+  const inputPromptProps: InputPromptProps | undefined = isInputActive
+    ? {
+        buffer,
+        inputWidth,
+        suggestionsWidth,
+        onSubmit: handleFinalSubmit,
+        userMessages,
+        onClearScreen: handleClearScreen,
+        config,
+        slashCommands,
+        commandContext,
+        shellModeActive,
+        setShellModeActive,
+        focus: isFocused,
+        vimHandleInput,
+        placeholder,
+      }
+    : undefined;
 
   return (
     <StreamingContext.Provider value={streamingState}>

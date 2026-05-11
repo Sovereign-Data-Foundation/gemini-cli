@@ -85,7 +85,7 @@ interface AppInteractionPaneProps {
   showAutoAcceptIndicator: ApprovalMode;
   shellModeActive: boolean;
   isInputActive: boolean;
-  inputPromptProps: InputPromptProps;
+  inputPromptProps?: InputPromptProps;
 }
 
 const DebugConsoleSection = ({
@@ -310,7 +310,9 @@ export const AppInteractionPane = ({
           inputWidth={inputWidth}
         />
 
-        {isInputActive && <InputPrompt {...inputPromptProps} />}
+        {isInputActive && inputPromptProps && (
+          <InputPrompt {...inputPromptProps} />
+        )}
       </>
     )}
   </>
