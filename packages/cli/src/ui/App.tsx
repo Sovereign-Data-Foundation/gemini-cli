@@ -50,7 +50,9 @@ import {
   type IdeContext,
   ideContext,
 } from '@google/gemini-cli-core';
-import { IdeIntegrationNudgeResult } from './IdeIntegrationNudge.js';
+import {
+  IdeIntegrationNudgeResult,
+} from './IdeIntegrationNudge.js';
 import { validateAuthMethod } from '../config/auth.js';
 import { useLogger } from './hooks/useLogger.js';
 import { StreamingContext } from './contexts/StreamingContext.js';
