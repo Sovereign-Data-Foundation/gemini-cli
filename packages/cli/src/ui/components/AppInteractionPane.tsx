@@ -84,7 +84,6 @@ interface AppInteractionPaneProps {
   isNarrow: boolean;
   showAutoAcceptIndicator: ApprovalMode;
   shellModeActive: boolean;
-  isInputActive: boolean;
   inputPromptProps?: InputPromptProps;
 }
 
@@ -165,7 +164,6 @@ export const AppInteractionPane = ({
   isNarrow,
   showAutoAcceptIndicator,
   shellModeActive,
-  isInputActive,
   inputPromptProps,
 }: AppInteractionPaneProps) => (
   <>
@@ -310,9 +308,7 @@ export const AppInteractionPane = ({
           inputWidth={inputWidth}
         />
 
-        {isInputActive && inputPromptProps && (
-          <InputPrompt {...inputPromptProps} />
-        )}
+        {inputPromptProps && <InputPrompt {...inputPromptProps} />}
       </>
     )}
   </>

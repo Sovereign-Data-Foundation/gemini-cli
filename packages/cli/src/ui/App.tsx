@@ -781,6 +781,48 @@ const App = ({ config, settings, startupWarnings = [], version }: AppProps) => {
     geminiClient,
   ]);
 
+  const placeholder = vimModeEnabled
+    ? "  Press 'i' for INSERT mode and 'Esc' for NORMAL mode."
+    : '  Type your message or @path/to/file';
+  const inputPromptProps = useMemo<InputPromptProps | undefined>(() => {
+    if (!isInputActive) {
+      return undefined;
+    }
+
+    return {
+      buffer,
+      inputWidth,
+      suggestionsWidth,
+      onSubmit: handleFinalSubmit,
+      userMessages,
+      onClearScreen: handleClearScreen,
+      config,
+      slashCommands,
+      commandContext,
+      shellModeActive,
+      setShellModeActive,
+      focus: isFocused,
+      vimHandleInput,
+      placeholder,
+    };
+  }, [
+    buffer,
+    commandContext,
+    config,
+    handleClearScreen,
+    handleFinalSubmit,
+    inputWidth,
+    isFocused,
+    isInputActive,
+    placeholder,
+    setShellModeActive,
+    shellModeActive,
+    slashCommands,
+    suggestionsWidth,
+    userMessages,
+    vimHandleInput,
+  ]);
+
   if (quittingMessages) {
     return (
       <Box flexDirection="column" marginBottom={1}>
@@ -805,27 +847,6 @@ const App = ({ config, settings, startupWarnings = [], version }: AppProps) => {
   // Arbitrary threshold to ensure that items in the static area are large
   // enough but not too large to make the terminal hard to use.
   const staticAreaMaxItemHeight = Math.max(terminalHeight * 4, 100);
-  const placeholder = vimModeEnabled
-    ? "  Press 'i' for INSERT mode and 'Esc' for NORMAL mode."
-    : '  Type your message or @path/to/file';
-  const inputPromptProps: InputPromptProps | undefined = isInputActive
-    ? {
-        buffer,
-        inputWidth,
-        suggestionsWidth,
-        onSubmit: handleFinalSubmit,
-        userMessages,
-        onClearScreen: handleClearScreen,
-        config,
-        slashCommands,
-        commandContext,
-        shellModeActive,
-        setShellModeActive,
-        focus: isFocused,
-        vimHandleInput,
-        placeholder,
-      }
-    : undefined;
 
   return (
     <StreamingContext.Provider value={streamingState}>
@@ -938,7 +959,6 @@ const App = ({ config, settings, startupWarnings = [], version }: AppProps) => {
             isNarrow={isNarrow}
             showAutoAcceptIndicator={showAutoAcceptIndicator}
             shellModeActive={shellModeActive}
-            isInputActive={isInputActive}
             inputPromptProps={inputPromptProps}
           />
 
