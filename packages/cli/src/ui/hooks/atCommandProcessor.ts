@@ -40,7 +40,7 @@ interface AtCommandPart {
   content: string;
 }
 
-type IgnoreReason = 'git' | 'gemini' | 'both';
+type FileIgnoreReason = 'git' | 'gemini' | 'both';
 
 type AtPathResolutionResult =
   | {
@@ -50,7 +50,7 @@ type AtPathResolutionResult =
     }
   | {
       type: 'ignored';
-      reason: IgnoreReason;
+      reason: FileIgnoreReason;
       pathName: string;
       debugMessages: string[];
     }
@@ -177,7 +177,7 @@ export async function handleAtCommand({
   const pathSpecsToRead: string[] = [];
   const atPathToResolvedSpecMap = new Map<string, string>();
   const contentLabelsForDisplay: string[] = [];
-  const ignoredByReason: Record<IgnoreReason, string[]> = {
+  const ignoredPathsByReason: Record<FileIgnoreReason, string[]> = {
     git: [],
     gemini: [],
     both: [],
@@ -371,7 +371,7 @@ export async function handleAtCommand({
     }
 
     if (result.type === 'ignored') {
-      ignoredByReason[result.reason].push(result.pathName);
+      ignoredPathsByReason[result.reason].push(result.pathName);
       continue;
     }
 
@@ -430,20 +430,20 @@ export async function handleAtCommand({
 
   // Inform user about ignored paths
   const totalIgnored =
-    ignoredByReason.git.length +
-    ignoredByReason.gemini.length +
-    ignoredByReason.both.length;
+    ignoredPathsByReason.git.length +
+    ignoredPathsByReason.gemini.length +
+    ignoredPathsByReason.both.length;
 
   if (totalIgnored > 0) {
     const messages = [];
-    if (ignoredByReason.git.length) {
-      messages.push(`Git-ignored: ${ignoredByReason.git.join(', ')}`);
+    if (ignoredPathsByReason.git.length) {
+      messages.push(`Git-ignored: ${ignoredPathsByReason.git.join(', ')}`);
     }
-    if (ignoredByReason.gemini.length) {
-      messages.push(`Gemini-ignored: ${ignoredByReason.gemini.join(', ')}`);
+    if (ignoredPathsByReason.gemini.length) {
+      messages.push(`Gemini-ignored: ${ignoredPathsByReason.gemini.join(', ')}`);
     }
-    if (ignoredByReason.both.length) {
-      messages.push(`Ignored by both: ${ignoredByReason.both.join(', ')}`);
+    if (ignoredPathsByReason.both.length) {
+      messages.push(`Ignored by both: ${ignoredPathsByReason.both.join(', ')}`);
     }
 
     const message = `Ignored ${totalIgnored} files:\n${messages.join('\n')}`;
