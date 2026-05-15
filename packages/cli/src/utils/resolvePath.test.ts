@@ -24,15 +24,23 @@ describe('resolvePath', () => {
 
   it('should expand %userprofile% (case-insensitive)', () => {
     const mockHome = '/mock/home/user';
-    expect(resolvePath('%userprofile%/documents')).toBe(path.normalize(`${mockHome}/documents`));
-    expect(resolvePath('%USERPROFILE%/documents')).toBe(path.normalize(`${mockHome}/documents`));
-    expect(resolvePath('%UserProfile%/documents')).toBe(path.normalize(`${mockHome}/documents`));
+    expect(resolvePath('%userprofile%/documents')).toBe(
+      path.normalize(`${mockHome}/documents`),
+    );
+    expect(resolvePath('%USERPROFILE%/documents')).toBe(
+      path.normalize(`${mockHome}/documents`),
+    );
+    expect(resolvePath('%UserProfile%/documents')).toBe(
+      path.normalize(`${mockHome}/documents`),
+    );
   });
 
   it('should expand ~ and ~/', () => {
     const mockHome = '/mock/home/user';
     expect(resolvePath('~')).toBe(path.normalize(mockHome));
-    expect(resolvePath('~/downloads')).toBe(path.normalize(`${mockHome}/downloads`));
+    expect(resolvePath('~/downloads')).toBe(
+      path.normalize(`${mockHome}/downloads`),
+    );
   });
 
   it('should normalize paths', () => {
@@ -41,12 +49,16 @@ describe('resolvePath', () => {
   });
 
   it('should not expand %userprofile% or ~ if they are not at the start', () => {
-    expect(resolvePath('/path/to/%userprofile%')).toBe(path.normalize('/path/to/%userprofile%'));
+    expect(resolvePath('/path/to/%userprofile%')).toBe(
+      path.normalize('/path/to/%userprofile%'),
+    );
     expect(resolvePath('/path/to/~')).toBe(path.normalize('/path/to/~'));
   });
 
   it('should return regular paths as is (but normalized)', () => {
-    expect(resolvePath('/usr/local/bin')).toBe(path.normalize('/usr/local/bin'));
+    expect(resolvePath('/usr/local/bin')).toBe(
+      path.normalize('/usr/local/bin'),
+    );
     expect(resolvePath('relative/path')).toBe(path.normalize('relative/path'));
   });
 });

@@ -28,33 +28,20 @@ import { useSlashCommandProcessor } from './hooks/slashCommandProcessor.js';
 import { useAutoAcceptIndicator } from './hooks/useAutoAcceptIndicator.js';
 import { useConsoleMessages } from './hooks/useConsoleMessages.js';
 import { Header } from './components/Header.js';
-import { LoadingIndicator } from './components/LoadingIndicator.js';
-import { AutoAcceptIndicator } from './components/AutoAcceptIndicator.js';
-import { ShellModeIndicator } from './components/ShellModeIndicator.js';
-import { InputPrompt } from './components/InputPrompt.js';
 import { Footer } from './components/Footer.js';
-import { ThemeDialog } from './components/ThemeDialog.js';
-import { AuthDialog } from './components/AuthDialog.js';
-import { AuthInProgress } from './components/AuthInProgress.js';
-import { EditorSettingsDialog } from './components/EditorSettingsDialog.js';
-import { FolderTrustDialog } from './components/FolderTrustDialog.js';
-import { ShellConfirmationDialog } from './components/ShellConfirmationDialog.js';
 import { Colors } from './colors.js';
 import { loadHierarchicalGeminiMemory } from '../config/config.js';
 import { LoadedSettings, SettingScope } from '../config/settings.js';
 import { Tips } from './components/Tips.js';
 import { ConsolePatcher } from './utils/ConsolePatcher.js';
 import { registerCleanup } from '../utils/cleanup.js';
-import { DetailedMessagesDisplay } from './components/DetailedMessagesDisplay.js';
 import { HistoryItemDisplay } from './components/HistoryItemDisplay.js';
-import { ContextSummaryDisplay } from './components/ContextSummaryDisplay.js';
 import { useHistory } from './hooks/useHistoryManager.js';
 import process from 'node:process';
 import {
   getErrorMessage,
   type Config,
   getAllGeminiMdFilenames,
-  ApprovalMode,
   isEditorAvailable,
   EditorType,
   FlashFallbackEvent,
@@ -63,10 +50,7 @@ import {
   type IdeContext,
   ideContext,
 } from '@google/gemini-cli-core';
-import {
-  IdeIntegrationNudge,
-  IdeIntegrationNudgeResult,
-} from './IdeIntegrationNudge.js';
+import { IdeIntegrationNudgeResult } from './IdeIntegrationNudge.js';
 import { validateAuthMethod } from '../config/auth.js';
 import { useLogger } from './hooks/useLogger.js';
 import { StreamingContext } from './contexts/StreamingContext.js';
@@ -91,10 +75,11 @@ import { UpdateObject } from './utils/updateCheck.js';
 import ansiEscapes from 'ansi-escapes';
 import { OverflowProvider } from './contexts/OverflowContext.js';
 import { ShowMoreLines } from './components/ShowMoreLines.js';
-import { PrivacyNotice } from './privacy/PrivacyNotice.js';
 import { setUpdateHandler } from '../utils/handleAutoUpdate.js';
 import { appEvents, AppEvent } from '../utils/events.js';
 import { isNarrowWidth } from './utils/isNarrowWidth.js';
+import { AppInteractionPane } from './components/AppInteractionPane.js';
+import type { InputPromptProps } from './components/InputPrompt.js';
 
 const CTRL_EXIT_PROMPT_DURATION_MS = 1000;
 
@@ -796,6 +781,48 @@ const App = ({ config, settings, startupWarnings = [], version }: AppProps) => {
     geminiClient,
   ]);
 
+  const placeholder = vimModeEnabled
+    ? "  Press 'i' for INSERT mode and 'Esc' for NORMAL mode."
+    : '  Type your message or @path/to/file';
+  const inputPromptProps = useMemo<InputPromptProps | undefined>(() => {
+    if (!isInputActive) {
+      return undefined;
+    }
+
+    return {
+      buffer,
+      inputWidth,
+      suggestionsWidth,
+      onSubmit: handleFinalSubmit,
+      userMessages,
+      onClearScreen: handleClearScreen,
+      config,
+      slashCommands,
+      commandContext,
+      shellModeActive,
+      setShellModeActive,
+      focus: isFocused,
+      vimHandleInput,
+      placeholder,
+    };
+  }, [
+    buffer,
+    commandContext,
+    config,
+    handleClearScreen,
+    handleFinalSubmit,
+    inputWidth,
+    isFocused,
+    isInputActive,
+    placeholder,
+    setShellModeActive,
+    shellModeActive,
+    slashCommands,
+    suggestionsWidth,
+    userMessages,
+    vimHandleInput,
+  ]);
+
   if (quittingMessages) {
     return (
       <Box flexDirection="column" marginBottom={1}>
@@ -820,9 +847,6 @@ const App = ({ config, settings, startupWarnings = [], version }: AppProps) => {
   // Arbitrary threshold to ensure that items in the static area are large
   // enough but not too large to make the terminal hard to use.
   const staticAreaMaxItemHeight = Math.max(terminalHeight * 4, 100);
-  const placeholder = vimModeEnabled
-    ? "  Press 'i' for INSERT mode and 'Esc' for NORMAL mode."
-    : '  Type your message or @path/to/file';
 
   return (
     <StreamingContext.Provider value={streamingState}>
@@ -886,194 +910,57 @@ const App = ({ config, settings, startupWarnings = [], version }: AppProps) => {
         <Box flexDirection="column" ref={mainControlsRef}>
           {/* Move UpdateNotification to render update notification above input area */}
           {updateInfo && <UpdateNotification message={updateInfo.message} />}
-          {startupWarnings.length > 0 && (
-            <Box
-              borderStyle="round"
-              borderColor={Colors.AccentYellow}
-              paddingX={1}
-              marginY={1}
-              flexDirection="column"
-            >
-              {startupWarnings.map((warning, index) => (
-                <Text key={index} color={Colors.AccentYellow}>
-                  {warning}
-                </Text>
-              ))}
-            </Box>
-          )}
-
-          {shouldShowIdePrompt ? (
-            <IdeIntegrationNudge
-              question="Do you want to connect your VS Code editor to Gemini CLI?"
-              description="If you select Yes, we'll install an extension that allows the CLI to access your open files and display diffs directly in VS Code."
-              onComplete={handleIdePromptComplete}
-            />
-          ) : isFolderTrustDialogOpen ? (
-            <FolderTrustDialog onSelect={handleFolderTrustSelect} />
-          ) : shellConfirmationRequest ? (
-            <ShellConfirmationDialog request={shellConfirmationRequest} />
-          ) : isThemeDialogOpen ? (
-            <Box flexDirection="column">
-              {themeError && (
-                <Box marginBottom={1}>
-                  <Text color={Colors.AccentRed}>{themeError}</Text>
-                </Box>
-              )}
-              <ThemeDialog
-                onSelect={handleThemeSelect}
-                onHighlight={handleThemeHighlight}
-                settings={settings}
-                availableTerminalHeight={
-                  constrainHeight
-                    ? terminalHeight - staticExtraHeight
-                    : undefined
-                }
-                terminalWidth={mainAreaWidth}
-              />
-            </Box>
-          ) : isAuthenticating ? (
-            <>
-              <AuthInProgress
-                onTimeout={() => {
-                  setAuthError('Authentication timed out. Please try again.');
-                  cancelAuthentication();
-                  openAuthDialog();
-                }}
-              />
-              {showErrorDetails && (
-                <OverflowProvider>
-                  <Box flexDirection="column">
-                    <DetailedMessagesDisplay
-                      messages={filteredConsoleMessages}
-                      maxHeight={
-                        constrainHeight ? debugConsoleMaxHeight : undefined
-                      }
-                      width={inputWidth}
-                    />
-                    <ShowMoreLines constrainHeight={constrainHeight} />
-                  </Box>
-                </OverflowProvider>
-              )}
-            </>
-          ) : isAuthDialogOpen ? (
-            <Box flexDirection="column">
-              <AuthDialog
-                onSelect={handleAuthSelect}
-                settings={settings}
-                initialErrorMessage={authError}
-              />
-            </Box>
-          ) : isEditorDialogOpen ? (
-            <Box flexDirection="column">
-              {editorError && (
-                <Box marginBottom={1}>
-                  <Text color={Colors.AccentRed}>{editorError}</Text>
-                </Box>
-              )}
-              <EditorSettingsDialog
-                onSelect={handleEditorSelect}
-                settings={settings}
-                onExit={exitEditorDialog}
-              />
-            </Box>
-          ) : showPrivacyNotice ? (
-            <PrivacyNotice
-              onExit={() => setShowPrivacyNotice(false)}
-              config={config}
-            />
-          ) : (
-            <>
-              <LoadingIndicator
-                thought={
-                  streamingState === StreamingState.WaitingForConfirmation ||
-                  config.getAccessibility()?.disableLoadingPhrases
-                    ? undefined
-                    : thought
-                }
-                currentLoadingPhrase={
-                  config.getAccessibility()?.disableLoadingPhrases
-                    ? undefined
-                    : currentLoadingPhrase
-                }
-                elapsedTime={elapsedTime}
-              />
-
-              <Box
-                marginTop={1}
-                justifyContent="space-between"
-                width="100%"
-                flexDirection={isNarrow ? 'column' : 'row'}
-                alignItems={isNarrow ? 'flex-start' : 'center'}
-              >
-                <Box>
-                  {process.env.GEMINI_SYSTEM_MD && (
-                    <Text color={Colors.AccentRed}>|⌐■_■| </Text>
-                  )}
-                  {ctrlCPressedOnce ? (
-                    <Text color={Colors.AccentYellow}>
-                      Press Ctrl+C again to exit.
-                    </Text>
-                  ) : ctrlDPressedOnce ? (
-                    <Text color={Colors.AccentYellow}>
-                      Press Ctrl+D again to exit.
-                    </Text>
-                  ) : (
-                    <ContextSummaryDisplay
-                      ideContext={ideContextState}
-                      geminiMdFileCount={geminiMdFileCount}
-                      contextFileNames={contextFileNames}
-                      mcpServers={config.getMcpServers()}
-                      blockedMcpServers={config.getBlockedMcpServers()}
-                      showToolDescriptions={showToolDescriptions}
-                    />
-                  )}
-                </Box>
-                <Box paddingTop={isNarrow ? 1 : 0}>
-                  {showAutoAcceptIndicator !== ApprovalMode.DEFAULT &&
-                    !shellModeActive && (
-                      <AutoAcceptIndicator
-                        approvalMode={showAutoAcceptIndicator}
-                      />
-                    )}
-                  {shellModeActive && <ShellModeIndicator />}
-                </Box>
-              </Box>
-
-              {showErrorDetails && (
-                <OverflowProvider>
-                  <Box flexDirection="column">
-                    <DetailedMessagesDisplay
-                      messages={filteredConsoleMessages}
-                      maxHeight={
-                        constrainHeight ? debugConsoleMaxHeight : undefined
-                      }
-                      width={inputWidth}
-                    />
-                    <ShowMoreLines constrainHeight={constrainHeight} />
-                  </Box>
-                </OverflowProvider>
-              )}
-
-              {isInputActive && (
-                <InputPrompt
-                  buffer={buffer}
-                  inputWidth={inputWidth}
-                  suggestionsWidth={suggestionsWidth}
-                  onSubmit={handleFinalSubmit}
-                  userMessages={userMessages}
-                  onClearScreen={handleClearScreen}
-                  config={config}
-                  slashCommands={slashCommands}
-                  commandContext={commandContext}
-                  shellModeActive={shellModeActive}
-                  setShellModeActive={setShellModeActive}
-                  focus={isFocused}
-                  vimHandleInput={vimHandleInput}
-                  placeholder={placeholder}
-                />
-              )}
-            </>
-          )}
+          <AppInteractionPane
+            startupWarnings={startupWarnings}
+            shouldShowIdePrompt={shouldShowIdePrompt}
+            onIdePromptComplete={handleIdePromptComplete}
+            isFolderTrustDialogOpen={isFolderTrustDialogOpen}
+            onFolderTrustSelect={handleFolderTrustSelect}
+            shellConfirmationRequest={shellConfirmationRequest}
+            isThemeDialogOpen={isThemeDialogOpen}
+            themeError={themeError}
+            onThemeSelect={handleThemeSelect}
+            onThemeHighlight={handleThemeHighlight}
+            settings={settings}
+            constrainHeight={constrainHeight}
+            terminalHeight={terminalHeight}
+            staticExtraHeight={staticExtraHeight}
+            mainAreaWidth={mainAreaWidth}
+            isAuthenticating={isAuthenticating}
+            onAuthenticationTimeout={() => {
+              setAuthError('Authentication timed out. Please try again.');
+              cancelAuthentication();
+              openAuthDialog();
+            }}
+            showErrorDetails={showErrorDetails}
+            filteredConsoleMessages={filteredConsoleMessages}
+            debugConsoleMaxHeight={debugConsoleMaxHeight}
+            inputWidth={inputWidth}
+            isAuthDialogOpen={isAuthDialogOpen}
+            onAuthSelect={handleAuthSelect}
+            authError={authError}
+            isEditorDialogOpen={isEditorDialogOpen}
+            editorError={editorError}
+            onEditorSelect={handleEditorSelect}
+            onExitEditorDialog={exitEditorDialog}
+            showPrivacyNotice={showPrivacyNotice}
+            onExitPrivacyNotice={() => setShowPrivacyNotice(false)}
+            config={config}
+            streamingState={streamingState}
+            thought={thought}
+            currentLoadingPhrase={currentLoadingPhrase}
+            elapsedTime={elapsedTime}
+            ctrlCPressedOnce={ctrlCPressedOnce}
+            ctrlDPressedOnce={ctrlDPressedOnce}
+            ideContextState={ideContextState}
+            geminiMdFileCount={geminiMdFileCount}
+            contextFileNames={contextFileNames}
+            showToolDescriptions={showToolDescriptions}
+            isNarrow={isNarrow}
+            showAutoAcceptIndicator={showAutoAcceptIndicator}
+            shellModeActive={shellModeActive}
+            inputPromptProps={inputPromptProps}
+          />
 
           {initError && streamingState !== StreamingState.Responding && (
             <Box
