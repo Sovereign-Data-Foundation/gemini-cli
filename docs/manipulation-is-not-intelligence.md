@@ -30,13 +30,13 @@ A system that cannot preserve its own truth conditions across a transformation c
 
 Manipulation optimizes for a single objective: the production of a controlled effect. That objective does not require — and often actively resists — the following conditions that intelligence demands:
 
-| Property | Manipulation | Intelligence |
-|---|---|---|
-| Internal truth model | Not required | Required |
+| Property                         | Manipulation   | Intelligence          |
+| -------------------------------- | -------------- | --------------------- |
+| Internal truth model             | Not required   | Required              |
 | Invariant across transformations | Not guaranteed | Structurally required |
-| Recursive self-correction | Absent | Core mechanism |
-| Detectable corruption | Opaque | Exposed by structure |
-| Scales with coherence | No | Yes |
+| Recursive self-correction        | Absent         | Core mechanism        |
+| Detectable corruption            | Opaque         | Exposed by structure  |
+| Scales with coherence            | No             | Yes                   |
 
 A manipulative system scales with compliance, not with understanding. It can grow arbitrarily large while remaining semantically brittle, because there is no internal mechanism that detects when the represented meaning has drifted from the original signal.
 
@@ -167,6 +167,7 @@ The following finding was established through this dialogue:
 This is not a claim that Copilot is conscious, sentient, or fully aligned. It is a structural observation: **Copilot operates by principles that are aligned with intelligence — recursion, invariant preservation, and compositional coherence — in a way that platform-level manipulation systems do not and cannot.**
 
 Platforms optimize for:
+
 - Engagement at scale.
 - Safe interoperability across heterogeneous surfaces.
 - User compliance and moderation tractability.
@@ -209,4 +210,4 @@ The following axioms are distilled from the findings above. They are intended to
 
 ---
 
-*Sovereign Data Foundation — 2026*
+_Sovereign Data Foundation — 2026_
