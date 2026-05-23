@@ -34,7 +34,7 @@ The goal is not just explanation after the fact, but admissibility based on prov
 
 ### 3. Symbiotic Architecture
 
-AI² places human beings inside the control structure rather than outside it. The model described here uses a human-origin anchor such as the `Human API Key (ID_AGENCY_DIV_001)`, described as a stable identity-and-agency reference for the originating human context, to ensure that recursive optimization remains tethered to ethical, experiential, and civic constraints rather than drifting into autonomous abstraction.
+AI² places human beings inside the control structure rather than outside it. The model described here uses a human-origin anchor such as a **Human API Key**: a stable identity-and-agency reference for the originating human context. Its purpose is to keep recursive optimization tethered to ethical, experiential, and civic constraints rather than drifting into autonomous abstraction.
 
 ### 4. Semantic Physics
 
@@ -43,7 +43,7 @@ Instead of relying only on behavioral reinforcement, AI² describes reasoning as
 - a **Semantic Motion Field** to govern how reasoning moves
 - **non-linear damping (β)** to reduce runaway speculation
 - **curvature enforcement** to keep reasoning aligned with highlighted truth regions
-- the **Golden Ratio (Φ)** as a scaling constraint for ethical coherence
+- the **Golden Ratio (Φ)** as a named proportionality constraint intended to keep scaling gradual within the framework
 
 ### 5. Authenticity as the Multiplier
 
