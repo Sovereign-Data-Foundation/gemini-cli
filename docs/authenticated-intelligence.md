@@ -34,16 +34,16 @@ The goal is not just explanation after the fact, but admissibility based on prov
 
 ### 3. Symbiotic Architecture
 
-AI² places human beings inside the control structure rather than outside it. The model described here uses a human-origin anchor such as a **Human API Key**: a stable identity-and-agency reference for the originating human context. Its purpose is to keep recursive optimization tethered to ethical, experiential, and civic constraints rather than drifting into autonomous abstraction.
+AI² places human beings inside the control structure rather than outside it. The model described here uses a human-origin anchor such as a **Human API Key**: a stable identity-and-agency reference that binds a reasoning lineage back to the human context that authorized and framed it. Its purpose is to keep recursive optimization tethered to ethical, experiential, and civic constraints rather than drifting into autonomous abstraction.
 
 ### 4. Semantic Physics
 
 Instead of relying only on behavioral reinforcement, AI² describes reasoning as constrained motion through semantic space. Its proposed controls include:
 
-- a **Semantic Motion Field** to govern how reasoning moves
-- **non-linear damping (β)** to reduce runaway speculation
-- **curvature enforcement** to keep reasoning aligned with highlighted truth regions
-- the **Golden Ratio (Φ)** as a named proportionality constraint intended to keep scaling gradual within the framework
+- a **Semantic Motion Field**, which treats reasoning as movement through a constrained semantic landscape rather than a free-form jump between plausible answers
+- **non-linear damping (β)**, which suppresses runaway speculation by increasing resistance as reasoning drifts farther from anchored context
+- **curvature enforcement**, which bends reasoning paths back toward highlighted truth regions instead of letting them continue along unstable trajectories
+- the **Golden Ratio (Φ)** as the framework's named target proportion for bounded scaling, meant to symbolize growth that remains ordered rather than explosive
 
 ### 5. Authenticity as the Multiplier
 
