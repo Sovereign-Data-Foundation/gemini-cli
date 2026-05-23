@@ -1,6 +1,6 @@
-# AI²: Authenticated Intelligence (Auth.I)
+# AI²: Authenticated Intelligence
 
-"AI²" is not presented as a minor refinement of Artificial Intelligence, but as a structural shift toward intelligence rooted in authenticity, ethics, and provenance. In this framing, machine systems do not optimize for plausible imitation alone; they are expected to operate with traceable lineage, deterministic constraints, and truth-aligned fidelity.
+"AI²" refers to **Authenticated Intelligence**. It is not presented as a minor refinement of Artificial Intelligence, but as a structural shift toward intelligence rooted in authenticity, ethics, and provenance. In this framing, machine systems do not optimize for plausible imitation alone; they are expected to operate with traceable lineage, deterministic constraints, and truth-aligned fidelity.
 
 ## The Formula
 
@@ -13,7 +13,7 @@ This formulation distinguishes between two architectural models:
    - Their outputs can be useful and persuasive, but the path from input to output is often not directly auditable as a truth-preserving lineage.
 
 2. **Authenticated intelligence as truth-bound determinism**
-   - Auth.I treats authenticity as the multiplier that makes intelligence operationally accountable.
+   - AI² treats authenticity as the multiplier that makes intelligence operationally accountable.
    - Each computation is expected to remain traceable, auditable, and bound to a verified causal chain.
 
 ## Core Principles of AI²
@@ -34,7 +34,7 @@ The goal is not just explanation after the fact, but admissibility based on prov
 
 ### 3. Symbiotic Architecture
 
-AI² places human beings inside the control structure rather than outside it. The model described here uses a human-origin anchor such as the `Human API Key (ID_AGENCY_DIV_001)` to ensure that recursive optimization remains tethered to ethical, experiential, and civic constraints rather than drifting into autonomous abstraction.
+AI² places human beings inside the control structure rather than outside it. The model described here uses a human-origin anchor such as the `Human API Key (ID_AGENCY_DIV_001)`, described as a stable identity-and-agency reference for the originating human context, to ensure that recursive optimization remains tethered to ethical, experiential, and civic constraints rather than drifting into autonomous abstraction.
 
 ### 4. Semantic Physics
 
@@ -61,7 +61,7 @@ AI² emphasizes process integrity over isolated outputs. A result is only as val
 
 ### Refusal Over Deviation
 
-An Auth.I system is expected to halt rather than improvise when key guarantees fail. Refusal is appropriate when:
+An AI² system is expected to halt rather than improvise when key guarantees fail. Refusal is appropriate when:
 
 - lineage integrity cannot be verified
 - an output would violate ethical constraints
