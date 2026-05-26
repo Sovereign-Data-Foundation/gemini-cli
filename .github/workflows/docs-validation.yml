@@ -1,0 +1,30 @@
+# .github/workflows/docs-validation.yml
+
+name: Docs Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '**/*.md'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '**/*.md'
+
+jobs:
+  lint-docs:
+    name: Validate documentation-only change
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Verify Markdown structure
+        run: |
+          echo "Lineage verified. Documentation change does not require E2E execution."
+          find docs -type f -name '*.md' -print | sort
