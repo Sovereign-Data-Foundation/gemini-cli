@@ -222,7 +222,7 @@ class TriadicKnowledgeEngine {
           revocation_ref: human_seed.genesis_hash, // Use genesis hash as revocation ref
         },
         anchor: {
-          parent_hash: 'genesis',
+          parent_hash: human_seed.genesis_hash,
           payload_hash: crypto
             .createHash('sha256')
             .update(contentToWeave)
