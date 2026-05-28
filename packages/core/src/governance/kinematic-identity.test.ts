@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { verifyKinematicIdentity, TAS_DNA } from './kinematic-identity.js';
+import { verifyKinematicIdentity } from './kinematic-identity.js';
 
 describe('verifyKinematicIdentity', () => {
   it('should return true for clean payload', () => {
