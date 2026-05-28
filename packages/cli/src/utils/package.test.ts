@@ -21,7 +21,7 @@ describe('getPackageJson', () => {
     const { getPackageJson } = await import('./package.js');
     const mockPackageJson = { name: 'test-package', version: '1.0.0' };
     vi.mocked(readPackageUp).mockResolvedValue({
-      packageJson: mockPackageJson as any,
+      packageJson: mockPackageJson,
       path: '/path/to/package.json',
     });
 
@@ -43,7 +43,7 @@ describe('getPackageJson', () => {
     const { getPackageJson } = await import('./package.js');
     const mockPackageJson = { name: 'test-package', version: '1.0.0' };
     vi.mocked(readPackageUp).mockResolvedValue({
-      packageJson: mockPackageJson as any,
+      packageJson: mockPackageJson,
       path: '/path/to/package.json',
     });
 

@@ -1,225 +1,55 @@
-# Gemini CLI
+## Sovereign Data Foundation (SDF)
 
-[![Gemini CLI CI](https://github.com/google-gemini/gemini-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/google-gemini/gemini-cli/actions/workflows/ci.yml)
+The SDF layer serves as the formal cryptographic governance framework for the `tas_pythonetics` ecosystem. It translates raw behavioral, programmatic, and state data into a verifiably sovereign data pipeline where ownership, custody, and alignment are cryptographically enforced at the microkernel level before state mutations occur.
 
-![Gemini CLI Screenshot](./docs/assets/gemini-screenshot.png)
+## 🏗️ Architectural Topology
 
-This repository contains the Gemini CLI, a command-line AI workflow tool that connects to your
-tools, understands your code and accelerates your workflows.
-
-With the Gemini CLI you can:
-
-- Query and edit large codebases in and beyond Gemini's 1M token context window.
-- Generate new apps from PDFs or sketches, using Gemini's multimodal capabilities.
-- Automate operational tasks, like querying pull requests or handling complex rebases.
-- Integrate with GitHub: Use the [Gemini CLI GitHub Action](https://github.com/google-github-actions/run-gemini-cli) for automated PR reviews, issue triage, and on-demand AI assistance directly in your repositories.
-- Use tools and MCP servers to connect new capabilities, including [media generation with Imagen,
-  Veo or Lyria](https://github.com/GoogleCloudPlatform/vertex-ai-creative-studio/tree/main/experiments/mcp-genmedia)
-- Ground your queries with the [Google Search](https://ai.google.dev/gemini-api/docs/grounding)
-  tool, built into Gemini.
-
-## Quickstart
-
-You have two options to install Gemini CLI.
-
-### With Node
-
-1. **Prerequisites:** Ensure you have [Node.js version 20](https://nodejs.org/en/download) or higher installed.
-2. **Run the CLI:** Execute the following command in your terminal:
-
-   ```bash
-   npx https://github.com/google-gemini/gemini-cli
-   ```
-
-   Or install it with:
-
-   ```bash
-   npm install -g @google/gemini-cli
-   ```
-
-   Then, run the CLI from anywhere:
-
-   ```bash
-   gemini
-   ```
-
-### With Homebrew
-
-1. **Prerequisites:** Ensure you have [Homebrew](https://brew.sh/) installed.
-2. **Install the CLI:** Execute the following command in your terminal:
-
-   ```bash
-   brew install gemini-cli
-   ```
-
-   Then, run the CLI from anywhere:
-
-   ```bash
-   gemini
-   ```
-
-### Common Configuration steps
-
-3. **Pick a color theme**
-4. **Authenticate:** When prompted, sign in with your personal Google account. This will grant you up to 60 model requests per minute and 1,000 model requests per day using Gemini.
-
-You are now ready to use the Gemini CLI!
-
-### Use a Gemini API key:
-
-The Gemini API provides a free tier with [100 requests per day](https://ai.google.dev/gemini-api/docs/rate-limits#free-tier) using Gemini 2.5 Pro, control over which model you use, and access to higher rate limits (with a paid plan):
-
-1. Generate a key from [Google AI Studio](https://aistudio.google.com/apikey).
-2. Set it as an environment variable in your terminal. Replace `YOUR_API_KEY` with your generated key.
-
-   ```bash
-   export GEMINI_API_KEY="YOUR_API_KEY"
-   ```
-
-3. (Optionally) Upgrade your Gemini API project to a paid plan on the API key page (will automatically unlock [Tier 1 rate limits](https://ai.google.dev/gemini-api/docs/rate-limits#tier-1))
-
-### Use a Vertex AI API key:
-
-The Vertex AI API provides a [free tier](https://cloud.google.com/vertex-ai/generative-ai/docs/start/express-mode/overview) using express mode for Gemini 2.5 Pro, control over which model you use, and access to higher rate limits with a billing account:
-
-1. Generate a key from [Google Cloud](https://cloud.google.com/vertex-ai/generative-ai/docs/start/api-keys).
-2. Set it as an environment variable in your terminal. Replace `YOUR_API_KEY` with your generated key and set GOOGLE_GENAI_USE_VERTEXAI to true
-
-   ```bash
-   export GOOGLE_API_KEY="YOUR_API_KEY"
-   export GOOGLE_GENAI_USE_VERTEXAI=true
-   ```
-
-3. (Optionally) Add a billing account on your project to get access to [higher usage limits](https://cloud.google.com/vertex-ai/generative-ai/docs/quotas)
-
-For other authentication methods, including Google Workspace accounts, see the [authentication](./docs/cli/authentication.md) guide.
-
-## Examples
-
-Once the CLI is running, you can start interacting with Gemini from your shell.
-
-You can start a project from a new directory:
-
-```sh
-cd new-project/
-gemini
-> Write me a Gemini Discord bot that answers questions using a FAQ.md file I will provide
-```
-
-Or work with an existing project:
-
-```sh
-git clone https://github.com/google-gemini/gemini-cli
-cd gemini-cli
-gemini
-> Give me a summary of all of the changes that went in yesterday
-```
-
-### Next steps
-
-- Learn how to [contribute to or build from the source](./CONTRIBUTING.md).
-- Explore the available **[CLI Commands](./docs/cli/commands.md)**.
-- If you encounter any issues, review the **[troubleshooting guide](./docs/troubleshooting.md)**.
-- For more comprehensive documentation, see the [full documentation](./docs/index.md).
-- Take a look at some [popular tasks](#popular-tasks) for more inspiration.
-- Check out our **[Official Roadmap](./ROADMAP.md)**
-
-### Troubleshooting
-
-Head over to the [troubleshooting guide](docs/troubleshooting.md) if you're
-having issues.
-
-## GitHub Integration
-
-Integrate Gemini CLI directly into your GitHub workflows with the [**Gemini CLI GitHub Action**](https://github.com/google-github-actions/run-gemini-cli). Key features include:
-
-- **Pull Request Reviews**: Automatically review pull requests when they're opened.
-- **Issue Triage**: Automatically triage and label GitHub issues.
-- **On-demand Collaboration**: Mention `@gemini-cli` in issues and pull requests for assistance and task delegation.
-- **Custom Workflows**: Set up your own scheduled tasks and event-driven automations.
-
-## Popular tasks
-
-### Explore a new codebase
-
-Start by `cd`ing into an existing or newly-cloned repository and running `gemini`.
+The SDF operates as a zero-trust compliance boundary, ensuring that no data state is advanced without verification against the lineage ledger.
 
 ```text
-> Describe the main pieces of this system's architecture.
+      [ Inbound Sovereign Data / State Nodes ]
+                        │
+                        ▼
+┌───────────────────────────────────────────────┐
+│              Phase0Microkernel                │ ◄── Anchored to Named Steward
+│  ┌─────────────────────────────────────────┐  │
+│  │             SentientLock                │  │ ◄── Validates Trust & Immunity Bounds
+│  │    [ FORM ➔ FUNCTION ➔ FAITHFULNESS ]   │  │
+│  └─────────────────────────────────────────┘  │
+└───────────────────────────────────────────────┘
+                        │
+                        ▼
+      [ 64-Char Cryptographic Lineage Hash ]
 ```
 
-```text
-> What security mechanisms are in place?
+## 🔑 Core Sovereignty Mechanics
+
+### 1. The Invariant Triple Sequence
+
+To maintain an uncompromised state boundary, every data block or node must clear a strict chronologically ordered evaluation pipeline via `verify_triple(node, parent_node, window)`:
+
+- **FORM**: Validates spatial constraints, structural schemas, and geometry bounds. Enforces the strict Golden Ratio baseline floor (`φ_min = 0.6180339887`).
+- **FUNCTION**: Evaluates operational state boundaries, runtime behaviors, and programmatic execution profiles.
+- **FAITHFULNESS**: Certifies alignment with long-term ecosystem integrity, jurisdictional trust, and ethical immunity constraints (`ethics.py`).
+
+Any breakdown or out-of-order execution across these boundaries triggers an immediate, uncatchable `InvariantViolation`.
+
+### 2. Lineage Chaining & Custody
+
+Successful validation of an SDF node returns an immutable 64-character SHA-256 lineage hash. This hash serves as the structural link required to chain sequential blocks together, producing a transparent, audit-ready provenance trail back to the system's initialization.
+
+## 🛠️ Operational Setup & Integration
+
+### Bootstrapping the Sovereign Root
+
+The root of the foundation must be anchored to a named steward during system initialization. The bootstrap sequence locks the foundation and prevents initialization drift.
+
+```python
+from tas_pythonetics.src.tas_phase0_microkernel import Phase0Microkernel
+
+# Initialize the kernel and bind it to the steward identity
+kernel = Phase0Microkernel(steward="steward_identity_omega")
+lock_status = kernel.bootstrap()
+
+# Returns: {"status": "BOOTSTRAP_LOCKED", "genesis_root": "<64-char-root-hash>"}
 ```
-
-```text
-> Provide a step-by-step dev onboarding doc for developers new to the codebase.
-```
-
-```text
-> Summarize this codebase and highlight the most interesting patterns or techniques I could learn from.
-```
-
-```text
-> Identify potential areas for improvement or refactoring in this codebase, highlighting parts that appear fragile, complex, or hard to maintain.
-```
-
-```text
-> Which parts of this codebase might be challenging to scale or debug?
-```
-
-```text
-> Generate a README section for the [module name] module explaining what it does and how to use it.
-```
-
-```text
-> What kind of error handling and logging strategies does the project use?
-```
-
-```text
-> Which tools, libraries, and dependencies are used in this project?
-```
-
-### Work with your existing code
-
-```text
-> Implement a first draft for GitHub issue #123.
-```
-
-```text
-> Help me migrate this codebase to the latest version of Java. Start with a plan.
-```
-
-### Automate your workflows
-
-Use MCP servers to integrate your local system tools with your enterprise collaboration suite.
-
-```text
-> Make me a slide deck showing the git history from the last 7 days, grouped by feature and team member.
-```
-
-```text
-> Make a full-screen web app for a wall display to show our most interacted-with GitHub issues.
-```
-
-### Interact with your system
-
-```text
-> Convert all the images in this directory to png, and rename them to use dates from the exif data.
-```
-
-```text
-> Organize my PDF invoices by month of expenditure.
-```
-
-### Uninstall
-
-Head over to the [Uninstall](docs/Uninstall.md) guide for uninstallation instructions.
-
-## Terms of Service and Privacy Notice
-
-For details on the terms of service and privacy notice applicable to your use of Gemini CLI, see the [Terms of Service and Privacy Notice](./docs/tos-privacy.md).
-
-## Security Disclosures
-
-Please see our [security disclosure process](SECURITY.md). All [security advisories](https://github.com/google-gemini/gemini-cli/security/advisories) are managed on Github.
