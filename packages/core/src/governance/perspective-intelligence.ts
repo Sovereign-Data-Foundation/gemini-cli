@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as crypto from 'node:crypto';
 import { HumanSeed } from './persistent-root-kernel.js';
 import { BanachCurationOperator } from './banach-curation.js';
 
@@ -23,7 +22,6 @@ export interface PerceptualPoint {
  * Enforces contractive mapping for Curation.
  */
 export class PerspectiveIntelligenceEngine {
-  private static readonly GOLDEN_RATIO_FLOOR = 1.618; // Phi_min
   private banach: BanachCurationOperator;
 
   constructor() {
@@ -42,7 +40,7 @@ export class PerspectiveIntelligenceEngine {
    * Calculates the Invariant Diameter (d) - Deterministic anchor strength.
    * Derived from the HumanSeed (genesis hash).
    */
-  calculateDiameter(seed: HumanSeed): number {
+  calculateDiameter(_seed: HumanSeed): number {
     // Simulates anchor strength based on hash difficulty/integrity.
     // For simulation, we assume a valid HumanSeed provides a strong, constant anchor.
     // We could parse the hash, but let's normalize 'd' for this model.
@@ -62,7 +60,7 @@ export class PerspectiveIntelligenceEngine {
    * Simulates the semantic distance (Delta) from a point to the diameter.
    * In a real system, this might be vector distance in embedding space to the "truth" axis.
    */
-  calculateDistance(content: string, diameter: number): number {
+  calculateDistance(content: string, _diameter: number): number {
     // Simulation: Distance is inversely proportional to how "anchored" the content feels.
     // Or just proportional to C for now, but maybe reduced by keywords or structure.
     const c = this.calculateCircumference(content);

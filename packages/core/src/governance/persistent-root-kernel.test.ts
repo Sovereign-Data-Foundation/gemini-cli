@@ -5,11 +5,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  PersistentRootKernel,
-  PhoenixError,
-} from './persistent-root-kernel.js';
-import * as crypto from 'node:crypto';
+import { PersistentRootKernel } from './persistent-root-kernel.js';
+import * as sovereignLeader from './sovereign-leader.js';
 
 describe('PersistentRootKernel', () => {
   let kernel: PersistentRootKernel;
@@ -59,6 +56,18 @@ describe('PersistentRootKernel', () => {
     const prompt = 'Secure prompt';
     const result = await kernel.evaluate_cognitive_stream(prompt);
     expect(result.type).toBe('verified_output');
+  });
+
+  it('should anchor parent_hash to the runtime genesis hash', async () => {
+    const validateActionSpy = vi.spyOn(
+      sovereignLeader,
+      'validateSovereignAction',
+    );
+
+    await kernel.evaluate_cognitive_stream('Anchored prompt');
+
+    const [action] = validateActionSpy.mock.calls[0];
+    expect(action.anchor.parent_hash).toBe(action.authority.revocation_ref);
   });
 
   it('should trigger Recursive Repair [Re-Action] when initial PI check fails', async () => {

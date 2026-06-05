@@ -23,7 +23,7 @@ export const TAS_DNA = 'TAS_DNA_CURSIVE_INVARIANT';
  */
 export function verifyKinematicIdentity(
   payload: unknown,
-  dna: string = TAS_DNA,
+  _dna: string = TAS_DNA,
 ): boolean {
   // Placeholder implementation for the "cursive stroke" verification.
   // In a real system, this would likely verify a ZK proof or cryptographic signature

@@ -9,15 +9,10 @@ import {
   validateSovereignAction,
   SovereignViolationError,
 } from './sovereign-leader.js';
-import {
-  SovereignAction,
-  SovereignProof,
-  SovereignVerification,
-} from './types.js';
+import { SovereignAction } from './types.js';
 import {
   CircuitPublicInputs,
   CircuitPrivateInputs,
-  SnarkProof,
   ZkProver,
   SimulatedZkProver,
 } from './zk-snark.js';
@@ -141,10 +136,7 @@ class ZK_LedgerClient {
 
     // Generate ZK Proof
     try {
-      const proof = await this.prover.generateProof(
-        publicInputs,
-        privateInputs,
-      );
+      await this.prover.generateProof(publicInputs, privateInputs);
 
       // In a real system, this would post the proof to the ITL.
       // console.log(`[ZK_Ledger] Broadcasted Proof:`, proof);
@@ -163,7 +155,7 @@ class TriadicKnowledgeEngine {
   private piEngine: PerspectiveIntelligenceEngine;
   private recursiveRuntime: RecursiveRuntime;
 
-  constructor(private ledger: any) {
+  constructor() {
     this.piEngine = new PerspectiveIntelligenceEngine();
     this.recursiveRuntime = new RecursiveRuntime();
   }
@@ -222,7 +214,7 @@ class TriadicKnowledgeEngine {
           revocation_ref: human_seed.genesis_hash, // Use genesis hash as revocation ref
         },
         anchor: {
-          parent_hash: 'genesis',
+          parent_hash: human_seed.genesis_hash,
           payload_hash: crypto
             .createHash('sha256')
             .update(contentToWeave)
@@ -236,7 +228,7 @@ class TriadicKnowledgeEngine {
         },
       };
       validateSovereignAction(action);
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (e instanceof SovereignViolationError) {
         throw new PhoenixError(`Sovereign Violation: ${e.message}`);
       }
@@ -270,7 +262,7 @@ export class PersistentRootKernel {
   constructor() {
     this.enclave = new SecureEnclave();
     this.itlClient = new ZK_LedgerClient();
-    this.loom = new TriadicKnowledgeEngine({}); // LocalLedgerCache stub
+    this.loom = new TriadicKnowledgeEngine();
   }
 
   /**
@@ -306,7 +298,7 @@ export class PersistentRootKernel {
 
       // 5. Release verified semantic state to UI
       return { type: 'verified_output', content: verifiedGene.content };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof PhoenixError) {
         // Refusal Integrity (R_i) successfully executed
         return {
