@@ -22,7 +22,7 @@ import { ToolErrorType } from './tool-error.js';
 import { Type } from '@google/genai';
 import { SchemaValidator } from '../utils/schemaValidator.js';
 import { makeRelative, shortenPath } from '../utils/paths.js';
-import { isNodeError } from '../utils/errors.js';
+import { getErrorMessage, isNodeError } from '../utils/errors.js';
 import { Config, ApprovalMode } from '../config/config.js';
 import { ensureCorrectEdit } from '../utils/editCorrector.js';
 import { DEFAULT_DIFF_OPTIONS, getDiffStat } from './diffOptions.js';
@@ -229,8 +229,8 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
     let editData: CalculatedEdit;
     try {
       editData = await this.calculateEdit(this.params, abortSignal);
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error);
       console.log(`Error preparing edit: ${errorMsg}`);
       return false;
     }
@@ -316,8 +316,8 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
     let editData: CalculatedEdit;
     try {
       editData = await this.calculateEdit(this.params, signal);
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error);
       return {
         llmContent: `Error preparing edit: ${errorMsg}`,
         returnDisplay: `Error preparing edit: ${errorMsg}`,
@@ -390,8 +390,8 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
         llmContent: llmSuccessMessageParts.join(' '),
         returnDisplay: displayResult,
       };
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error);
       return {
         llmContent: `Error executing edit: ${errorMsg}`,
         returnDisplay: `Error writing file: ${errorMsg}`,
