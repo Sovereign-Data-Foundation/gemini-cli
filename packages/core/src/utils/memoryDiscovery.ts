@@ -94,8 +94,8 @@ async function getGeminiMdFilePathsInternal(
     currentWorkingDirectory,
   ]);
   const paths = [];
-  for (const dir of dirs) {
-    const pathsByDir = await getGeminiMdFilePathsInternalForEachDir(
+  const promises = Array.from(dirs).map((dir) =>
+    getGeminiMdFilePathsInternalForEachDir(
       dir,
       userHomePath,
       debugMode,
@@ -103,7 +103,10 @@ async function getGeminiMdFilePathsInternal(
       extensionContextFilePaths,
       fileFilteringOptions,
       maxDirs,
-    );
+    ),
+  );
+  const results = await Promise.all(promises);
+  for (const pathsByDir of results) {
     paths.push(...pathsByDir);
   }
   return Array.from(new Set<string>(paths));
