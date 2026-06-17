@@ -143,7 +143,7 @@ async function getGeminiMdFilePathsInternalForEachDir(
 
     // FIX: Only perform the workspace search (upward and downward scans)
     // if a valid currentWorkingDirectory is provided.
-    if (dir) {
+    if (dir && dir.trim() !== '') {
       const resolvedCwd = path.resolve(dir);
       if (debugMode)
         logger.debug(
