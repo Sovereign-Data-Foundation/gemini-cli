@@ -5,8 +5,14 @@ name: Gemini CLI CI
 on:
   push:
     branches: [main, release]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
   pull_request:
     branches: [main, release]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
   merge_group:
 
 jobs:
