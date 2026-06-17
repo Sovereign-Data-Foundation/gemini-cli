@@ -213,7 +213,7 @@ describe('restoreCommand', () => {
       type: 'message',
       messageType: 'error',
       // A more specific error message would be ideal, but for now, we can assert the current behavior.
-      content: expect.stringContaining('Could not read restorable tool calls.'),
+      content: 'Checkpoint file is missing toolCall data.',
     });
   });
 
