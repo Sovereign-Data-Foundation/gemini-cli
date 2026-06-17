@@ -40,6 +40,32 @@ interface AtCommandPart {
   content: string;
 }
 
+type IgnoreReason = 'git' | 'gemini' | 'both';
+
+type AtPathResolutionResult =
+  | {
+      type: 'invalid';
+      errorMessage: string;
+      debugMessages: string[];
+    }
+  | {
+      type: 'ignored';
+      reason: IgnoreReason;
+      pathName: string;
+      debugMessages: string[];
+    }
+  | {
+      type: 'success';
+      currentPathSpec: string;
+      originalAtPath: string;
+      pathName: string;
+      debugMessages: string[];
+    }
+  | {
+      type: 'skipped';
+      debugMessages: string[];
+    };
+
 /**
  * Parses a query string to find all '@<path>' commands and text segments.
  * Handles \ escaped spaces within paths.
@@ -151,7 +177,7 @@ export async function handleAtCommand({
   const pathSpecsToRead: string[] = [];
   const atPathToResolvedSpecMap = new Map<string, string>();
   const contentLabelsForDisplay: string[] = [];
-  const ignoredByReason: Record<string, string[]> = {
+  const ignoredByReason: Record<IgnoreReason, string[]> = {
     git: [],
     gemini: [],
     both: [],
@@ -169,151 +195,193 @@ export async function handleAtCommand({
     return { processedQuery: null, shouldProceed: false };
   }
 
-  for (const atPathPart of atPathCommandParts) {
-    const originalAtPath = atPathPart.content; // e.g., "@file.txt" or "@"
+  const resolutionPromises = atPathCommandParts.map(
+    async (atPathPart): Promise<AtPathResolutionResult> => {
+      const debugMessages: string[] = [];
+      const addDebugMessage = (message: string) => {
+        debugMessages.push(message);
+      };
+      const originalAtPath = atPathPart.content; // e.g., "@file.txt" or "@"
 
-    if (originalAtPath === '@') {
-      onDebugMessage(
-        'Lone @ detected, will be treated as text in the modified query.',
-      );
-      continue;
-    }
+      if (originalAtPath === '@') {
+        addDebugMessage(
+          'Lone @ detected, will be treated as text in the modified query.',
+        );
+        return { type: 'skipped', debugMessages };
+      }
 
-    const pathName = originalAtPath.substring(1);
-    if (!pathName) {
-      // This case should ideally not be hit if parseAllAtCommands ensures content after @
-      // but as a safeguard:
-      addItem(
-        {
-          type: 'error',
-          text: `Error: Invalid @ command '${originalAtPath}'. No path specified.`,
-        },
-        userMessageTimestamp,
-      );
-      // Decide if this is a fatal error for the whole command or just skip this @ part
-      // For now, let's be strict and fail the command if one @path is malformed.
-      return { processedQuery: null, shouldProceed: false };
-    }
+      const pathName = originalAtPath.substring(1);
+      if (!pathName) {
+        // This case should ideally not be hit if parseAllAtCommands ensures content after @
+        // but as a safeguard:
+        return {
+          type: 'invalid',
+          errorMessage: `Error: Invalid @ command '${originalAtPath}'. No path specified.`,
+          debugMessages,
+        };
+      }
 
-    // Check if path should be ignored based on filtering options
+      // Check if path should be ignored based on filtering options
 
-    const workspaceContext = config.getWorkspaceContext();
-    if (!workspaceContext.isPathWithinWorkspace(pathName)) {
-      onDebugMessage(
-        `Path ${pathName} is not in the workspace and will be skipped.`,
-      );
-      continue;
-    }
+      const workspaceContext = config.getWorkspaceContext();
+      if (!workspaceContext.isPathWithinWorkspace(pathName)) {
+        addDebugMessage(
+          `Path ${pathName} is not in the workspace and will be skipped.`,
+        );
+        return { type: 'skipped', debugMessages };
+      }
 
-    const gitIgnored =
-      respectFileIgnore.respectGitIgnore &&
-      fileDiscovery.shouldIgnoreFile(pathName, {
-        respectGitIgnore: true,
-        respectGeminiIgnore: false,
-      });
-    const geminiIgnored =
-      respectFileIgnore.respectGeminiIgnore &&
-      fileDiscovery.shouldIgnoreFile(pathName, {
-        respectGitIgnore: false,
-        respectGeminiIgnore: true,
-      });
+      const gitIgnored =
+        respectFileIgnore.respectGitIgnore &&
+        fileDiscovery.shouldIgnoreFile(pathName, {
+          respectGitIgnore: true,
+          respectGeminiIgnore: false,
+        });
+      const geminiIgnored =
+        respectFileIgnore.respectGeminiIgnore &&
+        fileDiscovery.shouldIgnoreFile(pathName, {
+          respectGitIgnore: false,
+          respectGeminiIgnore: true,
+        });
 
-    if (gitIgnored || geminiIgnored) {
-      const reason =
-        gitIgnored && geminiIgnored ? 'both' : gitIgnored ? 'git' : 'gemini';
-      ignoredByReason[reason].push(pathName);
-      const reasonText =
-        reason === 'both'
-          ? 'ignored by both git and gemini'
-          : reason === 'git'
-            ? 'git-ignored'
-            : 'gemini-ignored';
-      onDebugMessage(`Path ${pathName} is ${reasonText} and will be skipped.`);
-      continue;
-    }
+      if (gitIgnored || geminiIgnored) {
+        const reason =
+          gitIgnored && geminiIgnored ? 'both' : gitIgnored ? 'git' : 'gemini';
 
-    for (const dir of config.getWorkspaceContext().getDirectories()) {
-      let currentPathSpec = pathName;
-      let resolvedSuccessfully = false;
-      try {
-        const absolutePath = path.resolve(dir, pathName);
-        const stats = await fs.stat(absolutePath);
-        if (stats.isDirectory()) {
-          currentPathSpec =
-            pathName + (pathName.endsWith(path.sep) ? `**` : `/**`);
-          onDebugMessage(
-            `Path ${pathName} resolved to directory, using glob: ${currentPathSpec}`,
-          );
-        } else {
-          onDebugMessage(`Path ${pathName} resolved to file: ${absolutePath}`);
-        }
-        resolvedSuccessfully = true;
-      } catch (error) {
-        if (isNodeError(error) && error.code === 'ENOENT') {
-          if (config.getEnableRecursiveFileSearch() && globTool) {
-            onDebugMessage(
-              `Path ${pathName} not found directly, attempting glob search.`,
+        const reasonText =
+          reason === 'both'
+            ? 'ignored by both git and gemini'
+            : reason === 'git'
+              ? 'git-ignored'
+              : 'gemini-ignored';
+        addDebugMessage(
+          `Path ${pathName} is ${reasonText} and will be skipped.`,
+        );
+        return { type: 'ignored', reason, pathName, debugMessages };
+      }
+
+      for (const dir of config.getWorkspaceContext().getDirectories()) {
+        let currentPathSpec = pathName;
+        let resolvedSuccessfully = false;
+        try {
+          const absolutePath = path.resolve(dir, pathName);
+          const stats = await fs.stat(absolutePath);
+          if (stats.isDirectory()) {
+            currentPathSpec =
+              pathName + (pathName.endsWith(path.sep) ? `**` : `/**`);
+            addDebugMessage(
+              `Path ${pathName} resolved to directory, using glob: ${currentPathSpec}`,
             );
-            try {
-              const globResult = await globTool.buildAndExecute(
-                {
-                  pattern: `**/*${pathName}*`,
-                  path: dir,
-                },
-                signal,
+          } else {
+            addDebugMessage(
+              `Path ${pathName} resolved to file: ${absolutePath}`,
+            );
+          }
+          resolvedSuccessfully = true;
+        } catch (error) {
+          if (isNodeError(error) && error.code === 'ENOENT') {
+            if (config.getEnableRecursiveFileSearch() && globTool) {
+              addDebugMessage(
+                `Path ${pathName} not found directly, attempting glob search.`,
               );
-              if (
-                globResult.llmContent &&
-                typeof globResult.llmContent === 'string' &&
-                !globResult.llmContent.startsWith('No files found') &&
-                !globResult.llmContent.startsWith('Error:')
-              ) {
-                const lines = globResult.llmContent.split('\n');
-                if (lines.length > 1 && lines[1]) {
-                  const firstMatchAbsolute = lines[1].trim();
-                  currentPathSpec = path.relative(dir, firstMatchAbsolute);
-                  onDebugMessage(
-                    `Glob search for ${pathName} found ${firstMatchAbsolute}, using relative path: ${currentPathSpec}`,
-                  );
-                  resolvedSuccessfully = true;
+              try {
+                const globResult = await globTool.buildAndExecute(
+                  {
+                    pattern: `**/*${pathName}*`,
+                    path: dir,
+                  },
+                  signal,
+                );
+                if (
+                  globResult.llmContent &&
+                  typeof globResult.llmContent === 'string' &&
+                  !globResult.llmContent.startsWith('No files found') &&
+                  !globResult.llmContent.startsWith('Error:')
+                ) {
+                  const lines = globResult.llmContent.split('\n');
+                  if (lines.length > 1 && lines[1]) {
+                    const firstMatchAbsolute = lines[1].trim();
+                    currentPathSpec = path.relative(dir, firstMatchAbsolute);
+                    addDebugMessage(
+                      `Glob search for ${pathName} found ${firstMatchAbsolute}, using relative path: ${currentPathSpec}`,
+                    );
+                    resolvedSuccessfully = true;
+                  } else {
+                    addDebugMessage(
+                      `Glob search for '**/*${pathName}*' did not return a usable path. Path ${pathName} will be skipped.`,
+                    );
+                  }
                 } else {
-                  onDebugMessage(
-                    `Glob search for '**/*${pathName}*' did not return a usable path. Path ${pathName} will be skipped.`,
+                  addDebugMessage(
+                    `Glob search for '**/*${pathName}*' found no files or an error. Path ${pathName} will be skipped.`,
                   );
                 }
-              } else {
-                onDebugMessage(
-                  `Glob search for '**/*${pathName}*' found no files or an error. Path ${pathName} will be skipped.`,
+              } catch (globError) {
+                console.error(
+                  `Error during glob search for ${pathName}: ${getErrorMessage(globError)}`,
+                );
+                addDebugMessage(
+                  `Error during glob search for ${pathName}. Path ${pathName} will be skipped.`,
                 );
               }
-            } catch (globError) {
-              console.error(
-                `Error during glob search for ${pathName}: ${getErrorMessage(globError)}`,
-              );
-              onDebugMessage(
-                `Error during glob search for ${pathName}. Path ${pathName} will be skipped.`,
+            } else {
+              addDebugMessage(
+                `Glob tool not found. Path ${pathName} will be skipped.`,
               );
             }
           } else {
-            onDebugMessage(
-              `Glob tool not found. Path ${pathName} will be skipped.`,
+            console.error(
+              `Error stating path ${pathName}: ${getErrorMessage(error)}`,
+            );
+            addDebugMessage(
+              `Error stating path ${pathName}. Path ${pathName} will be skipped.`,
             );
           }
-        } else {
-          console.error(
-            `Error stating path ${pathName}: ${getErrorMessage(error)}`,
-          );
-          onDebugMessage(
-            `Error stating path ${pathName}. Path ${pathName} will be skipped.`,
-          );
+        }
+        if (resolvedSuccessfully) {
+          return {
+            type: 'success',
+            currentPathSpec,
+            originalAtPath,
+            pathName,
+            debugMessages,
+          };
         }
       }
-      if (resolvedSuccessfully) {
-        pathSpecsToRead.push(currentPathSpec);
-        atPathToResolvedSpecMap.set(originalAtPath, currentPathSpec);
-        contentLabelsForDisplay.push(pathName);
-        break;
-      }
+      return { type: 'skipped', debugMessages };
+    },
+  );
+
+  const resolutionResults = await Promise.all(resolutionPromises);
+
+  for (const result of resolutionResults) {
+    for (const debugMessage of result.debugMessages) {
+      onDebugMessage(debugMessage);
+    }
+
+    if (result.type === 'invalid') {
+      addItem(
+        {
+          type: 'error',
+          text: result.errorMessage,
+        },
+        userMessageTimestamp,
+      );
+      return { processedQuery: null, shouldProceed: false };
+    }
+
+    if (result.type === 'ignored') {
+      ignoredByReason[result.reason].push(result.pathName);
+      continue;
+    }
+
+    if (result.type === 'success') {
+      pathSpecsToRead.push(result.currentPathSpec);
+      atPathToResolvedSpecMap.set(
+        result.originalAtPath,
+        result.currentPathSpec,
+      );
+      contentLabelsForDisplay.push(result.pathName);
     }
   }
 
