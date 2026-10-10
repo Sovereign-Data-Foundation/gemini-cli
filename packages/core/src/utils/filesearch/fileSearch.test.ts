@@ -808,4 +808,42 @@ describe('FileSearch', () => {
       ]);
     });
   });
+
+  it('should initialize concurrently without blocking when loading ignore files', async () => {
+    tmpDir = await createTmpDir({
+      '.gitignore': 'dist/\nnode_modules/\n*.log\n',
+      '.geminiignore': 'build/\ncoverage/\n*.tmp\n',
+      src: ['file1.js', 'file2.js'],
+    });
+
+    const instances = Array.from(
+      { length: 10 },
+      () =>
+        new FileSearch({
+          projectRoot: tmpDir,
+          useGitignore: true,
+          useGeminiignore: true,
+          ignoreDirs: [],
+          cache: false,
+          cacheTtl: 0,
+        }),
+    );
+
+    const start = Date.now();
+    await Promise.all(instances.map((instance) => instance.initialize()));
+    const duration = Date.now() - start;
+
+    expect(duration).toBeLessThan(1000);
+
+    for (const instance of instances) {
+      const results = await instance.search('');
+      expect(results).toEqual([
+        'src/',
+        '.geminiignore',
+        '.gitignore',
+        'src/file1.js',
+        'src/file2.js',
+      ]);
+    }
+  });
 });
