@@ -109,7 +109,7 @@ export class FileSearch {
    * before performing any searches.
    */
   async initialize(): Promise<void> {
-    this.loadIgnoreRules();
+    await this.loadIgnoreRules();
     await this.crawlFiles();
     this.buildResultCache();
   }
@@ -199,19 +199,33 @@ export class FileSearch {
    * Loads ignore rules from .gitignore and .geminiignore files, and applies
    * any additional ignore directories specified in the options.
    */
-  private loadIgnoreRules(): void {
+  private async loadIgnoreRules(): Promise<void> {
+    const reads: Array<Promise<string | null>> = [];
+
     if (this.options.useGitignore) {
       const gitignorePath = path.join(this.absoluteDir, '.gitignore');
-      if (fs.existsSync(gitignorePath)) {
-        this.ignore.add(fs.readFileSync(gitignorePath, 'utf8'));
-      }
+      reads.push(fs.promises.readFile(gitignorePath, 'utf8').catch(() => null));
+    } else {
+      reads.push(Promise.resolve(null));
     }
 
     if (this.options.useGeminiignore) {
       const geminiignorePath = path.join(this.absoluteDir, '.geminiignore');
-      if (fs.existsSync(geminiignorePath)) {
-        this.ignore.add(fs.readFileSync(geminiignorePath, 'utf8'));
-      }
+      reads.push(
+        fs.promises.readFile(geminiignorePath, 'utf8').catch(() => null),
+      );
+    } else {
+      reads.push(Promise.resolve(null));
+    }
+
+    const [gitignoreContent, geminiignoreContent] = await Promise.all(reads);
+
+    if (gitignoreContent) {
+      this.ignore.add(gitignoreContent);
+    }
+
+    if (geminiignoreContent) {
+      this.ignore.add(geminiignoreContent);
     }
 
     const ignoreDirs = ['.git', ...this.options.ignoreDirs];
