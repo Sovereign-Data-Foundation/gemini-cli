@@ -200,7 +200,7 @@ export class FileSearch {
    * any additional ignore directories specified in the options.
    */
   private async loadIgnoreRules(): Promise<void> {
-    const tasks: Promise<string | null>[] = [];
+    const tasks: Array<Promise<string | null>> = [];
 
     if (this.options.useGitignore) {
       const gitignorePath = path.join(this.absoluteDir, '.gitignore');
