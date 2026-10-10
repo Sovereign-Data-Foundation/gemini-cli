@@ -5,7 +5,7 @@
  */
 
 import path from 'node:path';
-import fs from 'node:fs';
+import fs from 'node:fs/promises';
 import { fdir } from 'fdir';
 import picomatch from 'picomatch';
 import { Ignore } from './ignore.js';
@@ -109,7 +109,7 @@ export class FileSearch {
    * before performing any searches.
    */
   async initialize(): Promise<void> {
-    this.loadIgnoreRules();
+    await this.loadIgnoreRules();
     await this.crawlFiles();
     this.buildResultCache();
   }
@@ -199,19 +199,30 @@ export class FileSearch {
    * Loads ignore rules from .gitignore and .geminiignore files, and applies
    * any additional ignore directories specified in the options.
    */
-  private loadIgnoreRules(): void {
+  private async loadIgnoreRules(): Promise<void> {
+    const tasks: Array<Promise<string | null>> = [];
+
     if (this.options.useGitignore) {
       const gitignorePath = path.join(this.absoluteDir, '.gitignore');
-      if (fs.existsSync(gitignorePath)) {
-        this.ignore.add(fs.readFileSync(gitignorePath, 'utf8'));
-      }
+      tasks.push(fs.readFile(gitignorePath, 'utf8').catch(() => null));
+    } else {
+      tasks.push(Promise.resolve(null));
     }
 
     if (this.options.useGeminiignore) {
       const geminiignorePath = path.join(this.absoluteDir, '.geminiignore');
-      if (fs.existsSync(geminiignorePath)) {
-        this.ignore.add(fs.readFileSync(geminiignorePath, 'utf8'));
-      }
+      tasks.push(fs.readFile(geminiignorePath, 'utf8').catch(() => null));
+    } else {
+      tasks.push(Promise.resolve(null));
+    }
+
+    const [gitignoreContent, geminiignoreContent] = await Promise.all(tasks);
+
+    if (gitignoreContent !== null) {
+      this.ignore.add(gitignoreContent);
+    }
+    if (geminiignoreContent !== null) {
+      this.ignore.add(geminiignoreContent);
     }
 
     const ignoreDirs = ['.git', ...this.options.ignoreDirs];
