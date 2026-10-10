@@ -109,7 +109,7 @@ export class FileSearch {
    * before performing any searches.
    */
   async initialize(): Promise<void> {
-    this.loadIgnoreRules();
+    await this.loadIgnoreRules();
     await this.crawlFiles();
     this.buildResultCache();
   }
@@ -199,19 +199,43 @@ export class FileSearch {
    * Loads ignore rules from .gitignore and .geminiignore files, and applies
    * any additional ignore directories specified in the options.
    */
-  private loadIgnoreRules(): void {
-    if (this.options.useGitignore) {
-      const gitignorePath = path.join(this.absoluteDir, '.gitignore');
-      if (fs.existsSync(gitignorePath)) {
-        this.ignore.add(fs.readFileSync(gitignorePath, 'utf8'));
+  private async loadIgnoreRules(): Promise<void> {
+    const readFileIfExists = async (
+      filePath: string,
+    ): Promise<string | null> => {
+      try {
+        return await fs.promises.readFile(filePath, 'utf8');
+      } catch (err: unknown) {
+        if (
+          err &&
+          typeof err === 'object' &&
+          'code' in err &&
+          (err as { code: string }).code === 'ENOENT'
+        ) {
+          return null;
+        }
+        throw err;
       }
+    };
+
+    const gitignorePath = path.join(this.absoluteDir, '.gitignore');
+    const geminiignorePath = path.join(this.absoluteDir, '.geminiignore');
+
+    const [gitignoreContent, geminiignoreContent] = await Promise.all([
+      this.options.useGitignore
+        ? readFileIfExists(gitignorePath)
+        : Promise.resolve(null),
+      this.options.useGeminiignore
+        ? readFileIfExists(geminiignorePath)
+        : Promise.resolve(null),
+    ]);
+
+    if (gitignoreContent) {
+      this.ignore.add(gitignoreContent);
     }
 
-    if (this.options.useGeminiignore) {
-      const geminiignorePath = path.join(this.absoluteDir, '.geminiignore');
-      if (fs.existsSync(geminiignorePath)) {
-        this.ignore.add(fs.readFileSync(geminiignorePath, 'utf8'));
-      }
+    if (geminiignoreContent) {
+      this.ignore.add(geminiignoreContent);
     }
 
     const ignoreDirs = ['.git', ...this.options.ignoreDirs];
